@@ -1,0 +1,12 @@
+*.DS_Store
+*.asv
+*.log
+*.mat
+*.png
+*.eps
+*.tex
+simulations/sw/results/*.*
+simulations/sw/figures/*.*
+simulations/sw/inputs/*SW_Model/*
+simulations/arma/results/*.*
+simulations/arma/figures/*.*
