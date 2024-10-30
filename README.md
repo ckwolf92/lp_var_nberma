@@ -1,2 +1,3 @@
 # lp_var_nberma
-LPs vs. VARs
+
+MATLAB code for inference on impulse responses using Local Projections, VARs, and several of their variants.
