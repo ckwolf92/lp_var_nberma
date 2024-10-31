@@ -23,6 +23,9 @@ dgp_type      = 'g'; % structural shock: either 'G' or 'MP'
 estimand_type = 'obsshock'; % structural estimand: either 'obsshock' or 'recursive'
 lag_type      = 4; % # of lags to impose in estimation, or NaN (= AIC)
 
+% will add: optionality for non-stationary DFM, different sample sizes,
+% salient observables only
+
 %% SETTINGS
 
 % apply shared settings as well as settings specific to DGP and estimand type
@@ -61,11 +64,6 @@ DF_model.Sigma_eta     = DFM_estimate.Sigma_eta;
 DF_model.Lambda        = DFM_estimate.Lambda;
 DF_model.delta         = DFM_estimate.delta;
 DF_model.sigma_v       = DFM_estimate.sigma_v;
-
-DF_model.variable_name_code  = DFM_estimate.bpnamevec;
-DF_model.variable_name_short = DFM_estimate.bplabvec_short;
-DF_model.variable_name_long  = DFM_estimate.bplabvec_long;
-DF_model.trans_code          = DFM_estimate.bptcodevec; % transformation code
 
 [DF_model.n_y,DF_model.n_fac] = size(DF_model.Lambda);
 
