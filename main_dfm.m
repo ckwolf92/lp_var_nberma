@@ -19,12 +19,12 @@ rng(1, 'twister');
 
 %% SET EXPERIMENT
 
-dgp_type      = 'g'; % structural shock: either 'G' or 'MP'
+dgp_type      = 'mp'; % structural shock: either 'G' or 'MP'
 estimand_type = 'obsshock'; % structural estimand: either 'obsshock' or 'recursive'
 lag_type      = 4; % # of lags to impose in estimation, or NaN (= AIC)
-
-% will add: optionality for non-stationary DFM, different sample sizes,
-% salient observables only
+mode_type     = 1; % robustness check mode:
+                   % 1 (baseline), 2 (persistent), 3 (salient series),
+                   % 4 (more observables)
 
 %% SETTINGS
 
@@ -33,6 +33,7 @@ lag_type      = 4; % # of lags to impose in estimation, or NaN (= AIC)
 shared;
 run(fullfile('_dfm/settings', dgp_type));
 run(fullfile('_dfm/settings', estimand_type));
+set_mode;
 
 % storage folder for results
 
@@ -43,7 +44,7 @@ if isnan(lag_type)
 else
     save_suff = num2str(lag_type);
 end
-save_folder = fullfile(save_pre, strcat('lag', save_suff));
+save_folder = fullfile(save_pre, save_mode_dir, strcat('lag', save_suff));
 
 %% ENCOMPASSING DFM MODEL
 
@@ -238,14 +239,22 @@ results.coverage_prob = mean(results.cover_inds,5); % coverage probability
 
 results.coverage_prob = mean(results.coverage_prob,1);
 
-clear irs_true_reshape
-
 % median length
 
 results.lengths       = results.cis_upper-results.cis_lower;
 results.median_length = median(results.lengths,5);
 
 results.median_length = mean(results.median_length,1);
+
+% bias squared
+
+results.bias2 = (mean(results.estims,4) - irs_true_reshape).^2;
+
+clear irs_true_reshape
+
+% variance
+
+results.vce = var(results.estims,1,4);
 
 %----------------------------------------------------------------
 % Save Results

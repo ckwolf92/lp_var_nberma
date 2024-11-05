@@ -22,13 +22,19 @@ cd([path]);
 % Set Experiment
 %----------------------------------------------------------------
 
-dgp_type      = 'g'; % structural shock: either 'G' or 'MP'
+dgp_type_plot = 'mp'; % structural shock: either 'G' or 'MP'
 estimand_type = 'obsshock'; % structural estimand: either 'obsshock' or 'recursive'
-lag_type      = 8; % # of lags to impose in estimation, or NaN (= AIC)
+lag_type      = 4; % # of lags to impose in estimation, or NaN (= AIC)
+mode_type     = 1; % robustness check mode:
+                   % 1 (baseline), 2 (persistent), 3 (salient series),
+                   % 4 (more observables)
 
 %----------------------------------------------------------------
 % Load
 %----------------------------------------------------------------
+
+mode_list   = {'baseline', 'persistent', 'salient', 'more'};
+load_mode_dir = mode_list{mode_type};
 
 load_pre = '_results'; % destination to store the results
 
@@ -37,9 +43,23 @@ if isnan(lag_type)
 else
     load_suff = num2str(lag_type);
 end
-load_folder = fullfile(load_pre, strcat('lag', load_suff));
+load_folder = fullfile(load_pre, load_mode_dir, strcat('lag', load_suff));
 
-load(fullfile(load_folder, strcat('dfm_', dgp_type, '_', estimand_type)))
+if strcmp(dgp_type_plot,'both')
+    load(fullfile(load_folder, strcat('dfm_', 'g', '_', estimand_type)))
+    results_g = results;
+    target_irf_g = DF_model.target_irf;
+    load(fullfile(load_folder, strcat('dfm_', 'mp', '_', estimand_type)))
+    results_mp = results;
+    DF_model.target_irf_g = target_irf_g;
+    clear results target_irf_g
+    results.coverage_prob = 0.5 * results_g.coverage_prob + 0.5 * results_mp.coverage_prob;
+    results.median_length = 0.5 * results_g.median_length + 0.5 * results_mp.median_length;
+    results.bias2 = [results_g.bias2;results_mp.bias2];
+    results.vce   = [results_g.vce;results_mp.vce];
+else
+    load(fullfile(load_folder, strcat('dfm_', dgp_type_plot, '_', estimand_type)))
+end
 
 %% GENERATE FIGURES
 
@@ -71,7 +91,7 @@ horzs   = settings.est.IRF_select;
 numhorz = length(horzs); % no. of estimated impulse response horizons
 
 %----------------------------------------------------------------
-% Plot
+% Coverage & Width
 %----------------------------------------------------------------
 
 % size
@@ -136,4 +156,34 @@ grid on;
 pos = get(gcf, 'Position');
 set(gcf, 'Position', [pos(1) pos(2) 2*pos(3) pos(4)]);
 set(gcf, 'PaperPositionMode', 'auto');
-saveas(the_f,fullfile(plot_folder, strcat('dfm_', dgp_type, '_', estimand_type,'.png')))
+% saveas(the_f,fullfile(plot_folder, strcat('dfm_', dgp_type, '_', estimand_type,'.png')))
+
+%----------------------------------------------------------------
+% Bias & Variance
+%----------------------------------------------------------------
+
+methods_names_plot  = {'VAR','LP'};
+font_size = 18;
+exper_plotname = estimand_type;
+
+the_objects = {'bias2','vce'}; % objects to plot
+the_titles =  {'Bias','Std'};  % Plot titles/file names
+
+if strcmp(dgp_type_plot,'both')
+    the_rms_irf  = sqrt(mean([DF_model.target_irf,DF_model.target_irf_g].^2)); % Root average squared true IRF across horizons
+else
+    the_rms_irf  = sqrt(mean(DF_model.target_irf.^2)); % Root average squared true IRF across horizons
+end
+
+for j=1:length(the_objects)
+    
+    the_result = sqrt(results.(the_objects{j}));
+    the_result = permute(the_result,[3 1 2]);
+
+    % normalized losses
+    
+    plot_loss(horzs-1, squeeze(quantile(the_result./the_rms_irf, 0.5, 2)), [], ...
+        strjoin({exper_plotname, ': Relative', the_titles{j}}), methods_names_plot, font_size);
+%     plot_save(fullfile(output_folder, strcat(exper_names{ne}, '_loss_', lower(the_titles{j}), '_reltruth', remark_loss_quant)), output_suffix);
+    
+end
