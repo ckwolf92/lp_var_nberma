@@ -31,4 +31,10 @@ switch mode_type
 
         settings.specifications.random_n_var = 7; % larger number of variables in each specification
 
+    case 5  % Salient persistent
+        settings.specifications.random_from_key_series = 1; % randomly select from some key series in DFM list?
+        DF_model.levels                                = 1;
+        DF_model.n_lags_fac                            = 4;
+        DF_model.n_lags_uar                            = 4;
+
 end

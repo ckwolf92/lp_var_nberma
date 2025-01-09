@@ -13,7 +13,7 @@ DF_model.n_lags_uar = 2; % lag order of measurement error
 % selection of DGPs from encompassing model
 
 settings.specifications.random_select         = 1; % randomly select variables from DFM list?
-settings.specifications.random_n_spec         = 8; % number of random specifications
+settings.specifications.random_n_spec         = 100; % number of random specifications
 settings.specifications.random_n_var          = 5; % number of variables in each random specification
 settings.specifications.random_category_range = [1 20; 21 31; 32 76; 77 86; 87 94; 95 131; 132 141;...
                                                  142 159; 160 171; 172 180; 181 207]; % ranges for Stock-Watson variable categories (see their Table 1)
@@ -46,7 +46,7 @@ settings.est.n_lag_large_ref = 4;
 
 % number of Monte Carlo draws
 
-settings.simul.n_mc    = 1e3; % number of Monte Carlo reps
+settings.simul.n_mc    = 500; % number of Monte Carlo reps
 settings.simul.seed    = (1:settings.simul.n_mc)*10 + randi([0,9],1,settings.simul.n_mc); % random seed for each Monte Carlo
 
 % sample settings
@@ -59,15 +59,16 @@ settings.simul.T_burn = 100; % burn-in
 % estimation methods
 
 settings.est.methods{1} = {'estimator', 'var',...
-            'bias_corr', false};
+            'bias_corr', true};
 
 settings.est.methods{2} = {'estimator', 'lp',...
-            'bias_corr', false};
+            'bias_corr', true};
 
-settings.est.no_const  = true; % true: omit intercept
+settings.est.no_const  = false; % true: omit intercept
 settings.est.se_homosk = true; % true: homoskedastic ses
 settings.est.alpha     = 0.1; % significance level
-settings.est.boot_num  = 2e3;  % number of bootstrap samples
+settings.est.boot_num  = 1e3;  % number of bootstrap samples
+settings.est.bootstrap = 'var';  % VAR bootstrap
 
 settings.est.methods_shared = {'resp_ind',  [], ...
                                'innov_ind', [], ...

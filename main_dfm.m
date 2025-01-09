@@ -8,7 +8,7 @@ clc
 clear all
 close all
 
-path = '/Users/christianwolf/Documents/GitHub/lp_var_nberma';
+path = cd;
 
 addpath(genpath([path '/_auxiliary_functions']));
 addpath(genpath([path '/_estim']));
@@ -24,7 +24,8 @@ estimand_type = 'obsshock'; % structural estimand: either 'obsshock' or 'recursi
 lag_type      = 4; % # of lags to impose in estimation, or NaN (= AIC)
 mode_type     = 1; % robustness check mode:
                    % 1 (baseline), 2 (persistent), 3 (salient series),
-                   % 4 (more observables)
+                   % 4 (more observables), 5 (salient + persistent series)
+
 
 %% SETTINGS
 
