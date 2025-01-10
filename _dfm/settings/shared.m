@@ -57,7 +57,7 @@ settings.simul.T_burn = 100; % burn-in
 % degree of misspecification
 
 settings.misspec.indic        = 1; % indicator for computing the degree of mis-specification
-settings.misspec.lags         = [1 4 8]; % lags for mis-specification analysis
+settings.misspec.lags         = [2 4 8]; % lags for mis-specification analysis
 settings.misspec.n_lags       = length(settings.misspec.lags);
 settings.misspec.VAR_infinity = 100; % VAR lag length
 settings.misspec.VMA_hor      = 200; % maximal VMA horizon
