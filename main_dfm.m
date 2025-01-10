@@ -1,5 +1,4 @@
 %% EXTENDED DFM SIMULATION STUDY
-% Christian Wolf
 % this version: 10/24/2024
 
 %% HOUSEKEEPING
@@ -36,9 +35,7 @@ set_mode;
 
 % storage folder for results
 
-save_pre = '_results'; % destination to store the results
-
-
+save_pre    = '_results'; % destination to store the results
 save_folder = fullfile(save_pre, save_mode_dir);
 
 %% ENCOMPASSING DFM MODEL

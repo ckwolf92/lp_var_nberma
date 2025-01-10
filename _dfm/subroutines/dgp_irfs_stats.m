@@ -13,6 +13,7 @@ model.VAR_largest_root = nan(n_spec,1);
 model.VAR_quant_root = nan(n_spec,1);
 model.frac_coef_for_large_lags = nan(n_spec,1);
 model.R0_sq = nan(n_spec,1);
+model.M = nan(n_spec,settings.misspec.n_lags);
 
 %----------------------------------------------------------------
 % IRFs in DFM
@@ -83,6 +84,34 @@ for i_spec = 1:n_spec
         model.R0_sq(i_spec) = degree_invertibility(ABCD_small.D, red_form.innov_var, settings.est.shock_weight(shock_select));
     else
         model.R0_sq(i_spec) = 1;
+    end
+
+    % degree of mis-specification
+
+    if settings.misspec.indic == 1
+
+        if ~strcmp(estimand_type, 'recursive')
+            ABCD_obs.C = [zeros(1,size(ABCD_obs.A,2));ABCD_obs.C];
+            ABCD_obs.D = [settings.est.shock_weight';ABCD_obs.D];
+            ABCD_small = ABCD_reduce(ABCD_obs);
+        end
+    
+        VAR_infty = popVAR(ABCD_small,settings);
+        y_aux     = get2ndmoments_VAR(VAR_infty,settings);
+    
+        for i_lags = 1:settings.misspec.n_lags
+    
+            settings.misspec.lags_temp = settings.misspec.lags(i_lags);
+            
+            VAR_p = popVARp(y_aux,settings);    
+            VMA   = getresidVMA(VAR_infty,VAR_p,settings); 
+
+            model.M(i_spec,i_lags) = M_fn(VAR_p,VMA,settings);
+    
+        end
+    
+        clear settings.misspec.lags_temp
+
     end
 
 end
