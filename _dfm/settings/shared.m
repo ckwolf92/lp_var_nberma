@@ -46,7 +46,7 @@ settings.est.n_lag_large_ref = 4;
 
 % number of Monte Carlo draws
 
-settings.simul.n_mc    = 500; % number of Monte Carlo reps
+settings.simul.n_mc    = 1000; % number of Monte Carlo reps
 settings.simul.seed    = (1:settings.simul.n_mc)*10 + randi([0,9],1,settings.simul.n_mc); % random seed for each Monte Carlo
 
 % sample settings
@@ -103,7 +103,7 @@ settings.est.n_lags_max  = 10;
 settings.est.no_const  = false; % true: omit intercept
 settings.est.se_homosk = true; % true: homoskedastic ses
 settings.est.alpha     = 0.1; % significance level
-settings.est.boot_num  = 1e3;  % number of bootstrap samples
+settings.est.boot_num  = 500;  % number of bootstrap samples
 settings.est.bootstrap = 'var';  % VAR bootstrap
 
 settings.est.methods_shared = {
