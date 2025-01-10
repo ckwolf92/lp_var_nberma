@@ -23,6 +23,9 @@ settings.specifications.random_key_series = [1,2,6,12,56,95,97,121,132,142,147,1
 
 settings.specifications.manual_var_select     = [1 142; 1 97]; % if manual selection, then these sets of variables will be selected
 
+settings.specifications.system_type = system_type;  % small (select only outcome variable and shock), big (include all variables).
+
+
 % preliminary structural shock settings for observed shock
 
 settings.est.estimate_shock_weight    = 1; % do we estimate the loading of the structural shock on the reduced-form shocks?
@@ -58,11 +61,28 @@ settings.simul.T_burn = 100; % burn-in
 
 % estimation methods
 
+% VAR
 settings.est.methods{1} = {'estimator', 'var',...
-            'bias_corr', true};
+                           'bias_corr', true};
+settings.est.methods{2} = settings.est.methods{1};
+settings.est.methods{3} = settings.est.methods{1};
 
-settings.est.methods{2} = {'estimator', 'lp',...
-            'bias_corr', true};
+% LP
+settings.est.methods{4} = {'estimator', 'lp',...
+                            'bias_corr', true};
+settings.est.methods{5} = settings.est.methods{4};
+
+
+% lag length selection
+
+settings.est.n_lags_fix = [NaN; 4; 8; NaN; 4];
+settings.est.est_n_lag  = isnan(settings.est.n_lags_fix);  % Indicator if lags are estimated
+settings.est.n_lags_max = 10;
+
+
+%  ------------------------------------------------------------------------
+% Shared settings
+% -------------------------------------------------------------------------
 
 settings.est.no_const  = false; % true: omit intercept
 settings.est.se_homosk = true; % true: homoskedastic ses
@@ -75,13 +95,8 @@ settings.est.methods_shared = {'resp_ind',  [], ...
                                'alpha',     settings.est.alpha,...
                                'no_const',  settings.est.no_const,...
                                'se_homosk', settings.est.se_homosk,...
-                               'boot_num',  settings.est.boot_num};
-
-% lag length selection
-
-settings.est.est_n_lag  = isnan(lag_type);
-settings.est.n_lags_max = 10;
-settings.est.n_lags_fix = lag_type;
+                               'boot_num',  settings.est.boot_num,...
+                               'bootstrap', settings.est.bootstrap};
 
 %% PARALLELIZATION
 

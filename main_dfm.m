@@ -21,11 +21,14 @@ rng(1, 'twister');
 
 dgp_type      = 'mp'; % structural shock: either 'G' or 'MP'
 estimand_type = 'obsshock'; % structural estimand: either 'obsshock' or 'recursive'
-lag_type      = 4; % # of lags to impose in estimation, or NaN (= AIC)
 mode_type     = 1; % robustness check mode:
                    % 1 (baseline), 2 (persistent), 3 (salient series),
                    % 4 (more observables), 5 (salient + persistent series)
+system_type   = 'small';  % 'big' (include all variables in system), 'small' (only include outcome variable and shock) 
 
+if strcmp(system_type , 'small')
+    assert(strcmp(estimand_type, 'obsshock'))
+end
 
 %% SETTINGS
 
@@ -40,12 +43,8 @@ set_mode;
 
 save_pre = '_results'; % destination to store the results
 
-if isnan(lag_type)
-    save_suff = '_aic';
-else
-    save_suff = num2str(lag_type);
-end
-save_folder = fullfile(save_pre, save_mode_dir, strcat('lag', save_suff));
+
+save_folder = fullfile(save_pre, save_mode_dir);
 
 %% ENCOMPASSING DFM MODEL
 
@@ -163,6 +162,7 @@ parfor (i_mc = 1:n_mc, settings.sim.num_workers)
 
         [data_y,nlags] = estim_prep(settings,data_sim);
     
+
         % IRF inference
 
         i_rep_estims    = nan(settings.est.n_methods, settings.est.n_IRF);
@@ -171,9 +171,9 @@ parfor (i_mc = 1:n_mc, settings.sim.num_workers)
         i_rep_cis_upper = i_rep_cis_lower;
 
         for i_method = 1:settings.est.n_methods
-
             [i_rep_estims(i_method,:),i_rep_ses(i_method,:),i_cis_dm,i_cis_boot] ...
-                = ir_estim(data_y, nlags, 0:settings.est.IRF_hor-1, settings.est.methods_shared{:}, settings.est.methods{i_method}{:});
+                = ir_estim(data_y, nlags(i_method), 0:settings.est.IRF_hor-1, ...
+                settings.est.methods_shared{:}, settings.est.methods{i_method}{:});
 
             i_rep_cis_lower(i_method,:,1)     = i_cis_dm(1,:);
             i_rep_cis_upper(i_method,:,1)     = i_cis_dm(2,:);
