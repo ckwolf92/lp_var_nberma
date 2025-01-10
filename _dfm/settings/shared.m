@@ -23,8 +23,6 @@ settings.specifications.random_key_series = [1,2,6,12,56,95,97,121,132,142,147,1
 
 settings.specifications.manual_var_select     = [1 142; 1 97]; % if manual selection, then these sets of variables will be selected
 
-settings.specifications.system_type = system_type;  % small (select only outcome variable and shock), big (include all variables).
-
 
 % preliminary structural shock settings for observed shock
 
@@ -59,26 +57,34 @@ settings.simul.T_burn = 100; % burn-in
 
 %% ESTIMATION SETTINGS
 
-% estimation methods
+if strcmp(estimand_type, 'recursive')
+    % Set estimator and # lags
+    [settings.est.methods{1:3}] = deal({'resp_ind',  [], 'innov_ind', [], ...
+                                        'estimator', 'var', 'bias_corr', true});  % VAR
+    [settings.est.methods{4:5}] = deal({'resp_ind',  [], 'innov_ind', [], ...
+                                        'estimator', 'lp' , 'bias_corr', true});  % LP
+    settings.est.n_lags_fix     = [NaN; 4; 8; NaN; 4];
+    
+    % big: include all variables in estimation. small: include only outcome
+    % variable and shock (only for 'obsshock' case)
+    settings.est.system_type = repmat({'big'}, 5, 1);
 
-% VAR
-settings.est.methods{1} = {'estimator', 'var',...
-                           'bias_corr', true};
-settings.est.methods{2} = settings.est.methods{1};
-settings.est.methods{3} = settings.est.methods{1};
+elseif strcmp(estimand_type, 'obsshock')
 
-% LP
-settings.est.methods{4} = {'estimator', 'lp',...
-                            'bias_corr', true};
-settings.est.methods{5} = settings.est.methods{4};
+    [settings.est.methods{[1:3, 6]}] = deal({'resp_ind',  [], 'innov_ind', [], ...
+                                            'estimator', 'var', 'bias_corr', true});  
+    [settings.est.methods{[4:5, 7]}] = deal({'resp_ind',  [], 'innov_ind', [], ...
+                                             'estimator', 'lp' , 'bias_corr', true});  
+    settings.est.n_lags_fix          = [NaN; 4; 8; NaN; 4; 4; 4];
+    settings.est.system_type         = [repmat({'big'}, 5, 1); repmat({'small'}, 2, 1)];
+
+else
+    error('Enter valid estimand_type...')
+end
 
 
-% lag length selection
-
-settings.est.n_lags_fix = [NaN; 4; 8; NaN; 4];
-settings.est.est_n_lag  = isnan(settings.est.n_lags_fix);  % Indicator if lags are estimated
-settings.est.n_lags_max = 10;
-
+settings.est.est_n_lag   = isnan(settings.est.n_lags_fix);  % Indicator if lags are estimated
+settings.est.n_lags_max  = 10;
 
 %  ------------------------------------------------------------------------
 % Shared settings
@@ -90,13 +96,18 @@ settings.est.alpha     = 0.1; % significance level
 settings.est.boot_num  = 1e3;  % number of bootstrap samples
 settings.est.bootstrap = 'var';  % VAR bootstrap
 
-settings.est.methods_shared = {'resp_ind',  [], ...
-                               'innov_ind', [], ...
+settings.est.methods_shared = {
                                'alpha',     settings.est.alpha,...
                                'no_const',  settings.est.no_const,...
                                'se_homosk', settings.est.se_homosk,...
                                'boot_num',  settings.est.boot_num,...
                                'bootstrap', settings.est.bootstrap};
+
+
+% number of estimation methods
+
+settings.est.n_methods = length(settings.est.methods);
+
 
 %% PARALLELIZATION
 
