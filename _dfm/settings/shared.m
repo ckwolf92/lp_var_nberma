@@ -72,9 +72,11 @@ settings.misspec.zeta         = 0.5; % local-to-VAR coefficient
 if strcmp(estimand_type, 'recursive')
 
     [settings.est.methods{1:3}] = deal({'resp_ind',  [], 'innov_ind', [], ...
-                                        'estimator', 'var', 'bias_corr', true});  % VAR
+                                        'estimator', 'var', ...
+                                        'bias_corr', true, 'bias_corr_lp', true});  % VAR
     [settings.est.methods{4:5}] = deal({'resp_ind',  [], 'innov_ind', [], ...
-                                        'estimator', 'lp' , 'bias_corr', true});  % LP
+                                        'estimator', 'lp' , ...
+                                        'bias_corr', true, 'bias_corr_lp', true});  % LP
 
     settings.est.n_lags_fix     = [NaN; 4; 8; NaN; 4];
     settings.est.system_type    = repmat({'big'}, 5, 1);
@@ -82,9 +84,11 @@ if strcmp(estimand_type, 'recursive')
 elseif strcmp(estimand_type, 'obsshock')
 
     [settings.est.methods{[1:3, 6]}] = deal({'resp_ind',  [], 'innov_ind', [], ...
-                                            'estimator', 'var', 'bias_corr', true});  
+                                            'estimator', 'var', ...
+                                            'bias_corr', true, 'bias_corr_lp', true});  
     [settings.est.methods{[4:5, 7]}] = deal({'resp_ind',  [], 'innov_ind', [], ...
-                                             'estimator', 'lp' , 'bias_corr', true});  
+                                             'estimator', 'lp' , ...
+                                             'bias_corr', true, 'bias_corr_lp', true});  
 
     settings.est.n_lags_fix          = [NaN; 4; 8; NaN; 4; 4; 4];
     settings.est.system_type         = [repmat({'big'}, 5, 1); repmat({'small'}, 2, 1)]; % small: include only outcome variable and shock

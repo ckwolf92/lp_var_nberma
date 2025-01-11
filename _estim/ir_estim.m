@@ -35,6 +35,8 @@ function [irs, ses, cis_dm, cis_boot, ses_bootstrap] = ir_estim(Y, p, horzs, var
         % Significance level (default: 0.05)
     addParameter(ip, 'bias_corr', true, @islogical);
         % Bias-correct VAR estimates? (default: yes)
+    addParameter(ip, 'bias_corr_lp', true, @islogical)
+        % Bias-correct LP estimates? (default: yes)
     addParameter(ip, 'se_homosk', false, @islogical);
         % Homoskedastic standard errors/bootstrap? (default: no)
     addParameter(ip, 'no_const', false, @islogical);
@@ -44,7 +46,7 @@ function [irs, ses, cis_dm, cis_boot, ses_bootstrap] = ir_estim(Y, p, horzs, var
     addParameter(ip, 'boot_num', 1000, @isnumeric);
         % Bootstrap iterations (default: 1000)
     addParameter(ip, 'boot_workers', 0, @isnumeric);
-        % Number of parallel workers used for bootstrapping (default: 0, meaning no parallel computation)
+        % Number of parallel workers used for bootstrapping (default: 0, meaning no parallel computation)    
     parse(ip, Y, p, horzs, varargin{:});
     
     
@@ -110,6 +112,10 @@ function [irs, ses, cis_dm, cis_boot, ses_bootstrap] = ir_estim(Y, p, horzs, var
             ses(h) = sqrt(the_irs_all_varcov);
             
         end
+
+        if ip.Results.bias_corr_lp  % Herbst & Johanssen (2024) bias correction
+            irs = LP_CorrectBias(irs, X{1,1}(:, 1:end-(1-ip.Results.no_const)));
+        end
         
     end
     
@@ -120,7 +126,7 @@ function [irs, ses, cis_dm, cis_boot, ses_bootstrap] = ir_estim(Y, p, horzs, var
     
     
     %% Delta method confidence intervals
-    
+
     cis_dm = irs + [-1; 1]*(cvs.*ses);
 
     %% Bootstrap confidence intervals
