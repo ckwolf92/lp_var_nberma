@@ -113,8 +113,12 @@ function [irs, ses, cis_dm, cis_boot, ses_bootstrap] = ir_estim(Y, p, horzs, var
             
         end
 
-        if ip.Results.bias_corr_lp  % Herbst & Johanssen (2024) bias correction
-            irs = LP_CorrectBias(irs, X{1,1}(:, 1:end-(1-ip.Results.no_const)));
+        if ip.Results.bias_corr_lp  % Herbst & Johanssen (2024) bias correction           
+            % Include contemporaneous/lagged controls and exclude the
+            % contemporaneous innovation
+            w   = [Y(:, 1:ip.Results.innov_ind-1), lagmatrix(Y, 1:p)];
+            w   = w(p+1:end, :);            
+            irs = LP_CorrectBias(irs, w);
         end
         
     end
