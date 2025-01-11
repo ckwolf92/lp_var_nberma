@@ -2,7 +2,7 @@
 
 % set up directory for robustness-check modes
 
-mode_list   = {'baseline', 'persistent', 'salient', 'more'};
+mode_list   = {'baseline', 'persistent', 'salient', 'more', 'persistent_salient'};
 save_mode_dir = mode_list{mode_type};
 
 % rewrite some baseline settings in "shared.m" for different robustness check modes
