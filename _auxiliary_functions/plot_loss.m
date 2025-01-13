@@ -14,7 +14,7 @@ function plot_loss(horzs, results, add_line, plot_name, plot_legend, font_size, 
     % figures
     
     if isempty(varargin)
-        figure;
+        figure('Visible', 'off');
     end
     set(gca,'FontSize',7/8*font_size)
     set(gca,'TickLabelInterpreter','latex')
