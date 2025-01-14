@@ -23,7 +23,7 @@ cd([path]);
 %----------------------------------------------------------------
 
 dgp_type_plot = 'both'; % structural shock: either 'g', or 'mp', or 'both'
-estimand_type = 'obsshock'; % structural estimand: either 'obsshock' or 'recursive'
+estimand_type = 'recursive'; % structural estimand: either 'obsshock' or 'recursive'
 mode_type     = 5; % robustness check mode:
                    % 1 (baseline), 2 (persistent), 3 (salient series),
                    % 4 (more observables), 5 (salient + persistent series)
@@ -252,7 +252,11 @@ ylim([min(yticks_length) max(yticks_length)]);
 yticks(yticks_length);
 yticklabels(yticklabels_length);
 title('median length, log scale','interpreter','latex');
-legend(proc_inference, 'Location', 'NorthEast','NumColumns', 2, 'interpreter','latex');
+if mode_type == 3
+    legend(proc_inference, 'Location', 'NorthEast','NumColumns', 2, 'interpreter','latex');
+elseif mode_type == 5
+    legend(proc_inference, 'Location', 'SouthEast','NumColumns', 2, 'interpreter','latex');
+end
 grid on;
 
 % size
@@ -321,7 +325,7 @@ end
 set(gcf,'color','w')
 xlabel('Degree of Misspecification','interpreter','latex','FontSize',20)
 xlim([M_lb M_ub]);
-legend({'$p = 1$','$p = 4$','$p = 8$'},'Location','Northeast','fontsize',18,'interpreter','latex')
+legend({'$p = 2$','$p = 4$','$p = 8$'},'Location','Northeast','fontsize',18,'interpreter','latex')
 grid on
 hold off
 
