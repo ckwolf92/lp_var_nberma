@@ -19,7 +19,7 @@ cd([path]);
 
 load res_application
 
-plot_folder = '_figures/lpvar_emp';
+plot_folder = '_figures/lpvar_illustr';
 mkdir(plot_folder)
 
 %% SETTINGS

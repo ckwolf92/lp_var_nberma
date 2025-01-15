@@ -77,6 +77,7 @@ elseif mode_type == 6
 
     results.M = [results_1.M;results_2.M];
 
+    mode_type     = 6;
     load_mode_dir = mode_list{mode_type};
 
 end

@@ -1,4 +1,4 @@
-function [data_y,nlags] = estim_prep(settings,data_sim, i_method);
+function [data_y,nlags] = estim_prep(settings,data_sim,i_method);
 
 % unpack settings
 
