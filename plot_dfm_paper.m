@@ -23,57 +23,69 @@ cd([path]);
 %----------------------------------------------------------------
 
 dgp_type_plot = 'both'; % structural shock: either 'g', or 'mp', or 'both'
-estimand_type = 'recursive'; % structural estimand: either 'obsshock' or 'recursive'
+estimand_type = 'obsshock'; % structural estimand: either 'obsshock' or 'recursive'
 mode_type     = 5; % robustness check mode:
                    % 1 (baseline), 2 (persistent), 3 (salient series),
-                   % 4 (more observables), 5 (salient + persistent series)
+                   % 4 (more observables), 5 (salient + persistent series),
+                   % 6 (combine 3 & 5)
 
 %----------------------------------------------------------------
 % Load
 %----------------------------------------------------------------
 
-mode_list   = {'baseline', 'persistent', 'salient', 'more', 'persistent_salient'};
-load_mode_dir = mode_list{mode_type};
+mode_list   = {'baseline', 'persistent', 'salient', 'more', 'persistent_salient', 'salient_all'};
 
-load_pre = '_results_small_2025_0113';
-load_folder = fullfile(load_pre, load_mode_dir);
+% load_pre = '_results_small_2025_0113';
+% load_pre = '_results_small_2025_0111';
+load_pre = '_results_small_2025_0114';
 
-% this should probably be cleaned up
+covg_cutoff = 0.8; % cut-off for coverage indicator plots
 
-if strcmp(dgp_type_plot,'both')
+if mode_type <= 5
 
-    load(fullfile(load_folder, strcat('dfm_', 'g', '_', estimand_type)))
-    results_g = results;
-    results_g.coverage_prob = mean(results_g.coverage_prob,1);
-    results_g.target_irf = DF_model.target_irf;
-    results_g.M = DF_model.M;
-    clear results DF_model DFM_estimate dgp_type
-
-    load(fullfile(load_folder, strcat('dfm_', 'mp', '_', estimand_type)))
-    results_mp = results;
-    results_mp.coverage_prob = mean(results_mp.coverage_prob,1);
-    results_mp.target_irf = DF_model.target_irf;
-    results_mp.M = DF_model.M;
-    clear results DF_model DFM_estimate dgp_type
-
-    results.target_irf = [results_g.target_irf,results_mp.target_irf];
-    results.bias2 = [results_g.bias2;results_mp.bias2];
-    results.vce   = [results_g.vce;results_mp.vce];
-    results.mse   = 0.5 * results.bias2 + 0.5 * results.vce;
-    results.coverage_prob = 0.5 * results_g.coverage_prob + 0.5 * results_mp.coverage_prob;
-    results.median_length = 0.5 * results_g.median_length + 0.5 * results_mp.median_length;  
-    results.M = [results_g.M;results_mp.M];
+    load_mode_dir = mode_list{mode_type};
+    load_folder = fullfile(load_pre, load_mode_dir);
     
-else
+    load_results_aux
 
-    load(fullfile(load_folder, strcat('dfm_', dgp_type_plot, '_', estimand_type)))
-    results.target_irf = DF_model.target_irf;
-    results.mse        = results.bias2 + results.vce;
-    results.coverage_prob = mean(results.coverage_prob,1);
-    results.M = DF_model.M;
-    clear DF_model DFM_estimate dgp_type
+elseif mode_type == 6
+
+    load_mode_dir = mode_list{3};
+    load_folder = fullfile(load_pre, load_mode_dir);
+    
+    load_results_aux
+    results_1 = results;
+
+    load_mode_dir = mode_list{5};
+    load_folder = fullfile(load_pre, load_mode_dir);
+    
+    load_results_aux
+    results_2 = results;
+
+    clear results
+
+    results.target_irf = [results_1.target_irf,results_2.target_irf];
+
+    results.bias2 = [results_1.bias2;results_2.bias2];
+    results.vce   = [results_1.vce;results_2.vce];
+    results.mse   = 0.5 * results.bias2 + 0.5 * results.vce;
+
+    results.coverage_prob  = [results_1.coverage_prob;results_2.coverage_prob];
+    results.coverage_avg   = mean(results.coverage_prob,1);
+    results.coverage_indic = mean(results.coverage_prob >= covg_cutoff,1);
+
+    results.median_length = [results_1.median_length;results_2.median_length];  
+    results.median_avg    = mean(results.median_length,1); 
+
+    results.M = [results_1.M;results_2.M];
+
+    load_mode_dir = mode_list{mode_type};
 
 end
+
+clear covg_cutoff
+
+% procedure names
 
 settings.est.names = {'VAR$_{AIC}$', 'VAR$_{4}$', 'VAR$_{8}$', 'LP$_{AIC}$', 'LP$_{4}$', ...
     'VAR$_{4, small}$', 'LP$_{4, small}$', 'VAR$_{b, AIC}$', 'LP$_{b, AIC}$'};
@@ -168,7 +180,7 @@ for j = 1:length(the_objects)
 end
 
 %----------------------------------------------------------------
-% Inference: Coverage-Width Plot
+% Inference: Coverage-Width Plots
 %----------------------------------------------------------------
 
 % preparations
@@ -194,7 +206,7 @@ left_pos = [gapsize_edges, gapsize_edges + gapsize + plotwidth];
 yticks_length = -3:1:1; % y-ticks for median length plot (log10 scale)
 yticklabels_length = {'0.001', '0.01', '0.1', '1', '10'}; % y-tick labels for median length plot
 
-% figure
+% average coverage and width
 
 figure(length(the_objects)+1)
 
@@ -209,7 +221,7 @@ pos(3) = plotwidth;
 set(gca,'Position', pos)
 hold on
 for i_proc = 1:numproc_inference
-    plot(horzs, squeeze(results.coverage_prob(1,proc_inference_indic_2(1,i_proc),:,proc_inference_indic_2(2,i_proc))), ...
+    plot(horzs, squeeze(results.coverage_avg(1,proc_inference_indic_2(1,i_proc),:,proc_inference_indic_2(2,i_proc))), ...
         line_specs{proc_inference_indic_1(i_proc)}, 'Color', line_colors(proc_inference_indic_1(i_proc),:),...
         'LineWidth',line_width(proc_inference_indic_1(i_proc)));
     hold on
@@ -237,7 +249,7 @@ pos(3) = plotwidth;
 set(gca,'Position', pos)
 hold on
 for i_proc = 1:numproc_inference
-    plot(horzs, squeeze(log10(results.median_length(1,proc_inference_indic_2(1,i_proc),:,proc_inference_indic_2(2,i_proc)))), ...
+    plot(horzs, squeeze(log10(results.median_avg(1,proc_inference_indic_2(1,i_proc),:,proc_inference_indic_2(2,i_proc)))), ...
         line_specs{proc_inference_indic_1(i_proc)}, 'Color', line_colors(proc_inference_indic_1(i_proc),:),...
         'LineWidth',line_width(proc_inference_indic_1(i_proc)));
     hold on
@@ -265,6 +277,36 @@ pos = get(gcf, 'Position');
 set(gcf, 'Position', [pos(1) pos(2) 2*pos(3) pos(4)]);
 set(gcf, 'PaperPositionMode', 'auto');
 exportgraphics(gcf, fullfile(plot_folder, 'covgwidth.eps'))
+
+% coverage indicator
+
+figure(length(the_objects)+2)
+
+pos = get(gca, 'Position');
+set(gca,'FontSize',18)
+set(gca,'TickLabelInterpreter','latex')
+set(gca,'Position', pos)
+hold on
+for i_proc = 1:numproc_inference
+    plot(horzs, squeeze(results.coverage_indic(1,proc_inference_indic_2(1,i_proc),:,proc_inference_indic_2(2,i_proc))), ...
+        line_specs{proc_inference_indic_1(i_proc)}, 'Color', line_colors(proc_inference_indic_1(i_proc),:),...
+        'LineWidth',line_width(proc_inference_indic_1(i_proc)));
+    hold on
+end
+if strcmp(estimand_type,'obsshock')
+    xlim([min(horzs) max(horzs)])
+elseif strcmp(estimand_type,'recursive')
+    xlim([min(horzs)+1 max(horzs)])
+end
+xlabel('horizon','interpreter','latex');
+ylim([0 1]);
+legend(proc_inference, 'Location', 'SouthEast','NumColumns', 2, 'interpreter','latex');
+grid on
+
+pos = get(gcf, 'Position');
+set(gcf, 'Position', [pos(1) pos(2) 1.4*pos(3) 1*pos(4)]);
+set(gcf, 'PaperPositionMode', 'auto');
+exportgraphics(gcf, fullfile(plot_folder, 'covgindic.eps'))
 
 %----------------------------------------------------------------
 % Degree of Mis-Specification
@@ -306,7 +348,7 @@ end
 
 % figure
 
-figure(length(the_objects)+2)
+figure(length(the_objects)+3)
 
 pos = get(gca, 'Position');
 set(gca,'Position', pos)
