@@ -23,8 +23,8 @@ cd([path]);
 %----------------------------------------------------------------
 
 dgp_type_plot = 'both'; % structural shock: either 'g', or 'mp', or 'both'
-estimand_type = 'obsshock'; % structural estimand: either 'obsshock' or 'recursive'
-mode_type     = 5; % robustness check mode:
+estimand_type = 'recursive'; % structural estimand: either 'obsshock' or 'recursive'
+mode_type     = 6; % robustness check mode:
                    % 1 (baseline), 2 (persistent), 3 (salient series),
                    % 4 (more observables), 5 (salient + persistent series),
                    % 6 (combine 3 & 5)
@@ -35,9 +35,7 @@ mode_type     = 5; % robustness check mode:
 
 mode_list   = {'baseline', 'persistent', 'salient', 'more', 'persistent_salient', 'salient_all'};
 
-% load_pre = '_results_small_2025_0113';
-% load_pre = '_results_small_2025_0111';
-load_pre = '_results_small_2025_0114';
+load_pre = '_results_small_2025_0115';
 
 covg_cutoff = 0.8; % cut-off for coverage indicator plots
 
@@ -88,7 +86,7 @@ clear covg_cutoff
 % procedure names
 
 settings.est.names = {'VAR$_{AIC}$', 'VAR$_{4}$', 'VAR$_{8}$', 'LP$_{AIC}$', 'LP$_{4}$', ...
-    'VAR$_{4, small}$', 'LP$_{4, small}$', 'VAR$_{b, AIC}$', 'LP$_{b, AIC}$'};
+    'VAR$_{AIC, small}$', 'LP$_{AIC, small}$', 'VAR$_{b, AIC}$', 'LP$_{b, AIC}$'};
 
 %% GENERATE FIGURES
 
