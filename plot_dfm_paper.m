@@ -23,8 +23,8 @@ cd([path]);
 %----------------------------------------------------------------
 
 dgp_type_plot = 'both'; % structural shock: either 'g', or 'mp', or 'both'
-estimand_type = 'recursive'; % structural estimand: either 'obsshock' or 'recursive'
-mode_type     = 6; % robustness check mode:
+estimand_type = 'obsshock'; % structural estimand: either 'obsshock' or 'recursive'
+mode_type     = 5; % robustness check mode:
                    % 1 (baseline), 2 (persistent), 3 (salient series),
                    % 4 (more observables), 5 (salient + persistent series),
                    % 6 (combine 3 & 5)
@@ -168,11 +168,15 @@ for j = 1:length(the_objects)
         xlim([min(horzs)+1 max(horzs)])
     end
     xlabel('horizon','interpreter','latex');
-    legend(proc_estim, 'Location', 'eastoutside', 'NumColumns', 1, 'interpreter', 'latex', 'FontSize', 18);
+    if j == 1
+    else
+        legend(proc_estim, 'Location', 'east', 'NumColumns', 1, 'interpreter', 'latex', 'FontSize', 18);
+    end
+%     legend(proc_estim, 'Location', 'eastoutside', 'NumColumns', 1, 'interpreter', 'latex', 'FontSize', 18);
     grid on
 
     pos = get(gcf, 'Position');
-    set(gcf, 'Position', [pos(1) pos(2) 1.4*pos(3) 1*pos(4)]);
+    set(gcf, 'Position', [pos(1) pos(2) 1.4*pos(3) 1.2*pos(4)]);
     set(gcf, 'PaperPositionMode', 'auto');
     exportgraphics(gcf, fullfile(plot_folder, [the_objects{j} '.eps']))
 
