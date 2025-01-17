@@ -24,7 +24,7 @@ cd([path]);
 
 dgp_type_plot = 'both'; % structural shock: either 'g', or 'mp', or 'both'
 estimand_type = 'obsshock'; % structural estimand: either 'obsshock' or 'recursive'
-mode_type     = 5; % robustness check mode:
+mode_type     = 6; % robustness check mode:
                    % 1 (baseline), 2 (persistent), 3 (salient series),
                    % 4 (more observables), 5 (salient + persistent series),
                    % 6 (combine 3 & 5)
@@ -190,10 +190,10 @@ end
 
 if strcmp(estimand_type,'obsshock')
     proc_inference_indic_1 = [1 8 2 6 4 9 5 7];
-    proc_inference_indic_2 = [1 1 2 6 4 4 5 7; 1 2 1 1 1 3 1 1];
+    proc_inference_indic_2 = [1 1 2 6 4 4 5 7; 1 2 1 1 1 4 1 1];
 elseif strcmp(estimand_type,'recursive')
     proc_inference_indic_1 = [1 8 2 4 9 5];
-    proc_inference_indic_2 = [1 1 2 4 4 5; 1 2 1 1 3 1];
+    proc_inference_indic_2 = [1 1 2 4 4 5; 1 2 1 1 4 1];
 end
 
 proc_inference    = settings.est.names(proc_inference_indic_1);
@@ -269,7 +269,7 @@ yticklabels(yticklabels_length);
 title('median length, log scale','interpreter','latex');
 if mode_type == 3
     legend(proc_inference, 'Location', 'NorthEast','NumColumns', 2, 'interpreter','latex');
-elseif mode_type == 5
+else
     legend(proc_inference, 'Location', 'SouthEast','NumColumns', 2, 'interpreter','latex');
 end
 grid on;
