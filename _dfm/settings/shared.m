@@ -49,9 +49,15 @@ settings.est.n_lag_large_ref = 4;
 settings.simul.n_mc    = 1000; % number of Monte Carlo reps
 settings.simul.seed    = (1:settings.simul.n_mc)*10 + randi([0,9],1,settings.simul.n_mc); % random seed for each Monte Carlo
 
-% sample settings
-
-settings.simul.T      = 240; % time periods for each simulation
+% time periods for each simulation
+switch sample_length
+    case 'short'
+        settings.simul.T = 100; 
+    case 'medium'
+        settings.simul.T = 240; 
+    case 'long'
+        settings.simul.T = 720; 
+end
 settings.simul.T_burn = 100; % burn-in
 
 % degree of misspecification

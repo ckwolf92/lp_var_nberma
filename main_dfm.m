@@ -23,6 +23,7 @@ estimand_type = 'obsshock'; % structural estimand: either 'obsshock' or 'recursi
 mode_type     = 3; % robustness check mode:
                    % 1 (baseline), 2 (persistent), 3 (salient series),
                    % 4 (more observables), 5 (salient + persistent series)
+sample_length = 'short';  % short (T=100), medium (T=240), long (T=720)
 
 %% SETTINGS
 
@@ -249,6 +250,7 @@ results.vce = var(results.estims,1,4);
 %----------------------------------------------------------------
 
 mkdir(save_folder);
-save(fullfile(save_folder, strcat('dfm_', dgp_type, '_', estimand_type)), ...
+save(fullfile(save_folder, ...
+    strcat('dfm_', dgp_type, '_', estimand_type, '_', sample_length)), ...
     'DFM_estimate','DF_model','settings','results',...
-    'dgp_type','estimand_type','mode_type', '-v7.3'); % save results
+    'dgp_type','estimand_type','mode_type', 'sample_length', '-v7.3'); % save results
