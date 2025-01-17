@@ -141,23 +141,14 @@ end
 % Color Preparation
 %----------------------------------------------------------------
 
-settings.colors.black  = [0 0 0];
-settings.colors.grey   = [130/255 130/255 130/255];
-settings.colors.orange = [204/255 102/255 0/255];
-settings.colors.green = [37/255 152/255 14/255];
-settings.colors.purple = [160/255 32/255 240/255];
-settings.colors.blue = [51/255 51/255 255/255];
-settings.colors.red = [255/255 0/255 0/255];
-settings.colors.list = [settings.colors.black;settings.colors.grey;settings.colors.orange];
+colors.blue  = [102/255 178/255 255/255];
+colors.dblue = 0.7 * colors.blue;
+colors.lblue = 0.4 * colors.blue + 0.6 * [1 1 1];
+colors.red   = [204/255 0/255 0/255];
+colors.dred  = 0.7 * colors.red;
+colors.lred  = 0.4 * colors.red + 0.6 * [1 1 1];
 
-n = 200;
-
-clear cmap
-cmap(1,:) = [204/255,102/255,0/255];
-cmap(2,:) = [1 1 1];
-cmap(3,:) = [160/255,160/255,160/255];
-[X,Y] = meshgrid([1:3],[1:50]);
-cmap = interp2(X([1,25,50],:),Y([1,25,50],:),cmap,X,Y);
+colors.grey = [170/255 170/255 170/255];
 
 %----------------------------------------------------------------
 % Settings
@@ -172,7 +163,7 @@ scale = 1/max(abs(DF_model.target_irf));
 %----------------------------------------------------------------
 
 plotwidth = 0.267;
-gapsize = 0.05;
+gapsize = 0.045;
 gapsize_edges = (1-3*plotwidth-2*gapsize)/2;
 left_pos = [gapsize_edges, gapsize_edges + gapsize + plotwidth, gapsize_edges + 2 * (gapsize + plotwidth)];
 
@@ -185,22 +176,22 @@ pos = get(gca, 'Position');
 pos(1) = left_pos(i_lags);
 pos(3) = plotwidth;
 set(gca,'Position', pos)
-set(gca,'FontSize',16)
+set(gca,'FontSize',18)
 set(gca,'TickLabelInterpreter','latex')
 hold on
-plot(0:1:IRF_plot-1,scale*DF_model.target_irf(1:IRF_plot),'linewidth',3,'linestyle','-','color',settings.colors.black)
+plot(0:1:IRF_plot-1,scale*DF_model.target_irf(1:IRF_plot),'linewidth',4,'linestyle','-','color',colors.grey)
 hold on
-plot(0:1:IRF_plot-1,scale*estims(4,:,i_lags),'linewidth',3,'linestyle','--','color',settings.colors.red)
+plot(0:1:IRF_plot-1,scale*estims(4,:,i_lags),'linewidth',4,'linestyle','-.','color',colors.blue)
 hold on
-plot(0:1:IRF_plot-1,scale*estims(1,:,i_lags),'linewidth',3,'linestyle',':','color',settings.colors.blue)
+plot(0:1:IRF_plot-1,scale*estims(1,:,i_lags),'linewidth',4,'linestyle',':','color',colors.red)
 hold on
-plot([lags_list(i_lags) lags_list(i_lags)],[-3 2],'Color',settings.colors.black,'LineWidth',2,'LineStyle','-')
+plot([lags_list(i_lags) lags_list(i_lags)],[-3 2],'Color',settings.colors.grey,'LineWidth',2,'LineStyle','-')
 % hold on
 set(gcf,'color','w')
-title(['$p = \; $' num2str(lags_list(i_lags))],'interpreter','latex','fontsize',17)
-xlabel('horizon','interpreter','latex','FontSize',17)
+title(['$p = \; $' num2str(lags_list(i_lags))],'interpreter','latex','fontsize',18)
+xlabel('horizon','interpreter','latex','FontSize',18)
 if i_lags == 1
-    ylabel('\%','interpreter','latex','FontSize',17)
+    ylabel('\%','interpreter','latex','FontSize',18)
 end
 % ylim([-1.5 0.5])
 % yticks([-1.5:0.5:0.5])
