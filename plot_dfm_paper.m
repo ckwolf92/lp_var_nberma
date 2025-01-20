@@ -23,7 +23,7 @@ cd([path]);
 %----------------------------------------------------------------
 
 dgp_type_plot = 'both'; % structural shock: either 'g', or 'mp', or 'both'
-estimand_type = 'obsshock'; % structural estimand: either 'obsshock' or 'recursive'
+estimand_type = 'recursive'; % structural estimand: either 'obsshock' or 'recursive'
 mode_type     = 6; % robustness check mode:
                    % 1 (baseline), 2 (persistent), 3 (salient series),
                    % 4 (more observables), 5 (salient + persistent series),
@@ -68,6 +68,8 @@ elseif mode_type == 6
     results.vce   = [results_1.vce;results_2.vce];
     results.mse   = 0.5 * results.bias2 + 0.5 * results.vce;
 
+    results.p = [results_1.p;results_2.p];
+
     results.coverage_prob  = [results_1.coverage_prob;results_2.coverage_prob];
     results.coverage_avg   = mean(results.coverage_prob,1);
     results.coverage_indic = mean(results.coverage_prob >= covg_cutoff,1);
@@ -87,7 +89,7 @@ clear covg_cutoff
 % procedure names
 
 settings.est.names = {'VAR$_{AIC}$', 'VAR$_{4}$', 'VAR$_{8}$', 'LP$_{AIC}$', 'LP$_{4}$', ...
-    'VAR$_{AIC, small}$', 'LP$_{AIC, small}$', 'VAR$_{b, AIC}$', 'LP$_{b, AIC}$'};
+    'VAR$_{AIC, small}$', 'LP$_{AIC, small}$', 'VAR$_{b, AIC}$', 'LP$_{b, AIC}$', 'VAR$_{b, 4}$', 'LP$_{b, 4}$'};
 
 %% GENERATE FIGURES
 
@@ -118,9 +120,10 @@ colors.lred  = 0.4 * colors.red + 0.6 * [1 1 1];
 line_colors = [colors.red; colors.dred; colors.dred; ...
                 colors.blue; colors.dblue; ...
                 colors.lred; colors.lblue; ...
-                colors.red; colors.blue];
+                colors.red; colors.blue; ...
+                colors.dred; colors.dblue];
 
-line_specs = {'-', ':', ':', '-', ':', ':', ':', '-.', '-.'};
+line_specs = {'-', ':', ':', '-', ':', ':', ':', '-.', '-.', '-.', '-.'};
 
 line_width = 5 * ones(length(line_specs),1);
 
@@ -162,6 +165,13 @@ for j = 1:length(the_objects)
             'Color', line_colors(proc_estim_indic(i_proc),:), 'LineWidth', line_width(proc_estim_indic(i_proc)));
         hold on
     end
+    if mode_type == 5
+        ylim([0 1])
+        yticks([0:0.2:1])
+    elseif mode_type == 6 && strcmp(dgp_type_plot,'mp') && j == 2
+        ylim([0 1])
+        yticks([0:0.2:1])
+    end
     if strcmp(estimand_type,'obsshock')
         xlim([min(horzs) max(horzs)])
     elseif strcmp(estimand_type,'recursive')
@@ -170,7 +180,11 @@ for j = 1:length(the_objects)
     xlabel('horizon','interpreter','latex');
     if j == 1
     else
-        legend(proc_estim, 'Location', 'east', 'NumColumns', 1, 'interpreter', 'latex', 'FontSize', 18);
+        if mode_type == 5
+            legend(proc_estim, 'Location', 'southeast', 'NumColumns', 1, 'interpreter', 'latex', 'FontSize', 18);
+        else
+            legend(proc_estim, 'Location', 'east', 'NumColumns', 1, 'interpreter', 'latex', 'FontSize', 18);
+        end
     end
 %     legend(proc_estim, 'Location', 'eastoutside', 'NumColumns', 1, 'interpreter', 'latex', 'FontSize', 18);
     grid on
@@ -192,8 +206,8 @@ if strcmp(estimand_type,'obsshock')
     proc_inference_indic_1 = [1 8 2 6 4 9 5 7];
     proc_inference_indic_2 = [1 1 2 6 4 4 5 7; 1 2 1 1 1 4 1 1];
 elseif strcmp(estimand_type,'recursive')
-    proc_inference_indic_1 = [1 8 2 4 9 5];
-    proc_inference_indic_2 = [1 1 2 4 4 5; 1 2 1 1 4 1];
+    proc_inference_indic_1 = [1 2 8 10 4 5 9 11];
+    proc_inference_indic_2 = [1 2 1 2 4 5 4 5; 1 1 2 2 1 1 4 4];
 end
 
 proc_inference    = settings.est.names(proc_inference_indic_1);

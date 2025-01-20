@@ -21,11 +21,12 @@ rng(1, 'twister');
 dgp_type      = 'mp'; % structural shock: either 'G' or 'MP'
 estimand_type = 'recursive'; % structural estimand: either 'obsshock' or 'recursive'
 lag_type      = 1; % # of lags to impose in estimation, or NaN (= AIC)
-mode_type     = 1; % robustness check mode:
+mode_type     = 3; % robustness check mode:
                    % 1 (baseline), 2 (persistent), 3 (salient series),
                    % 4 (more observables)
+sample_length = 'medium';  % short (T=100), medium (T=240), long (T=720)
 
-lags_list = [3 6 12];
+lags_list = [2 6 12];
 n_lags    = length(lags_list);
 
 plot_folder = '_figures/lpvar_illustr';
@@ -89,7 +90,7 @@ settings.est.shock_weight = shock_weight_fun_DFM(DF_model,settings);
 
 settings.specifications = pick_var_fn(DF_model, settings);
 
-settings.specifications.var_select = [1 56 120 159 142]; % GDP, unemployment, CPI, GZ bond premium, FFR
+settings.specifications.var_select = [56 1 121 151 142]; % unemployment, GDP, CPI, spread, FFR
 
 DF_model = dgp_irfs_stats(DF_model, settings, estimand_type);
 
@@ -185,7 +186,7 @@ plot(0:1:IRF_plot-1,scale*estims(4,:,i_lags),'linewidth',4,'linestyle','-.','col
 hold on
 plot(0:1:IRF_plot-1,scale*estims(1,:,i_lags),'linewidth',4,'linestyle',':','color',colors.red)
 hold on
-plot([lags_list(i_lags) lags_list(i_lags)],[-3 2],'Color',settings.colors.grey,'LineWidth',2,'LineStyle','-')
+plot([lags_list(i_lags) lags_list(i_lags)],[-3 2],'Color',colors.grey,'LineWidth',2,'LineStyle','-')
 % hold on
 set(gcf,'color','w')
 title(['$p = \; $' num2str(lags_list(i_lags))],'interpreter','latex','fontsize',18)
@@ -195,12 +196,12 @@ if i_lags == 1
 end
 % ylim([-1.5 0.5])
 % yticks([-1.5:0.5:0.5])
-ylim([-1.25 0.25])
-% yticks([-1.25:0.25:0.25])
-yticks([-1:0.5:0])
+ylim([-0.5 1.5])
+% % yticks([-1.25:0.25:0.25])
+yticks([-0.5:0.5:1.5])
 % xlim([0 16])
 if i_lags == 2
-    legend({'VAR/LP($\infty$)','LP($p$)','VAR($p$)'},'Location','Southeast','fontsize',17,'interpreter','latex')
+    legend({'VAR/LP($\infty$)','LP($p$)','VAR($p$)'},'Location','Northeast','fontsize',17,'interpreter','latex')
 end
 grid on
 hold off

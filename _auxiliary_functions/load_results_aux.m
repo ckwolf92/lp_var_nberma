@@ -18,6 +18,8 @@ if strcmp(dgp_type_plot,'both')
     results.vce   = [results_g.vce;results_mp.vce];
     results.mse   = 0.5 * results.bias2 + 0.5 * results.vce;
 
+    results.p = mean([results_g.ps;results_mp.ps],2);
+
     results.coverage_prob  = [results_g.coverage_prob;results_mp.coverage_prob];
     results.coverage_avg   = mean(results.coverage_prob,1);
     results.coverage_indic = mean(results.coverage_prob >= covg_cutoff,1);
@@ -39,6 +41,7 @@ else
     results.coverage_indic = mean(results.coverage_prob >= covg_cutoff,1);
     results.median_avg     = mean(results.median_length,1);
     results.M              = DF_model.M;
+    results.p              = mean(results.ps,2);
     clear DF_model DFM_estimate dgp_type
 
 end
