@@ -23,7 +23,7 @@ cd([path]);
 %----------------------------------------------------------------
 
 dgp_type_plot = 'both'; % structural shock: either 'g', or 'mp', or 'both'
-estimand_type = 'recursive'; % structural estimand: either 'obsshock' or 'recursive'
+estimand_type = 'obsshock'; % structural estimand: either 'obsshock' or 'recursive'
 mode_type     = 6; % robustness check mode:
                    % 1 (baseline), 2 (persistent), 3 (salient series),
                    % 4 (more observables), 5 (salient + persistent series),
@@ -144,6 +144,7 @@ numproc_estim = length(proc_estim);
 
 the_rms_irf = sqrt(mean(results.target_irf.^2)); % root average squared true IRF across horizons
 the_objects = {'bias2','vce','mse'}; % objects to plot
+the_titles = {'Bias','Standard Deviation','Mean Squared Error'};
 
 % figures
 
@@ -156,7 +157,7 @@ for j = 1:length(the_objects)
     figure(j)
 
     pos = get(gca, 'Position');
-    set(gca,'FontSize',18)
+    set(gca,'FontSize',20)
     set(gca,'TickLabelInterpreter','latex')
     set(gca,'Position', pos)
     hold on
@@ -181,12 +182,11 @@ for j = 1:length(the_objects)
     if j == 1
     else
         if mode_type == 5
-            legend(proc_estim, 'Location', 'southeast', 'NumColumns', 1, 'interpreter', 'latex', 'FontSize', 18);
+            legend(proc_estim, 'Location', 'southeast', 'NumColumns', 1, 'interpreter', 'latex', 'FontSize', 20);
         else
-            legend(proc_estim, 'Location', 'east', 'NumColumns', 1, 'interpreter', 'latex', 'FontSize', 18);
+            legend(proc_estim, 'Location', 'east', 'NumColumns', 1, 'interpreter', 'latex', 'FontSize', 20);
         end
     end
-%     legend(proc_estim, 'Location', 'eastoutside', 'NumColumns', 1, 'interpreter', 'latex', 'FontSize', 18);
     grid on
 
     pos = get(gcf, 'Position');
@@ -203,8 +203,8 @@ end
 % preparations
 
 if strcmp(estimand_type,'obsshock')
-    proc_inference_indic_1 = [1 8 2 6 4 9 5 7];
-    proc_inference_indic_2 = [1 1 2 6 4 4 5 7; 1 2 1 1 1 4 1 1];
+    proc_inference_indic_1 = [1 8 10 6 4 9 5 7];
+    proc_inference_indic_2 = [1 1 2 6 4 4 5 7; 1 2 2 1 1 4 1 1];
 elseif strcmp(estimand_type,'recursive')
     proc_inference_indic_1 = [1 2 8 10 4 5 9 11];
     proc_inference_indic_2 = [1 2 1 2 4 5 4 5; 1 1 2 2 1 1 4 4];

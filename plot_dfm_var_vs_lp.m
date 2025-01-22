@@ -189,7 +189,7 @@ hold on
 plot([lags_list(i_lags) lags_list(i_lags)],[-3 2],'Color',colors.grey,'LineWidth',2,'LineStyle','-')
 % hold on
 set(gcf,'color','w')
-title(['$p = \; $' num2str(lags_list(i_lags))],'interpreter','latex','fontsize',18)
+title(['$p = \; $' num2str(lags_list(i_lags))],'interpreter','latex','fontsize',21)
 xlabel('horizon','interpreter','latex','FontSize',18)
 if i_lags == 1
     ylabel('\%','interpreter','latex','FontSize',18)

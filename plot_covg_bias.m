@@ -14,10 +14,16 @@ cd([path]);
 
 %% COMPUTE COVERAGE DISTORTION
 
-b_over_sigma = 0:.01:3; 
+b_over_sigma = 0:0.01:3; 
+covg_targets = [0.68 0.9 0.95];
+norm_cutoff    = NaN(length(covg_targets),1);
+for i_covg = 1:length(covg_targets)
+    norm_cutoff(i_covg) = norminv(1 - (1 - covg_targets(i_covg))/2);
+end
 
-coverage_90  = normcdf(1.64-b_over_sigma,0,1) - normcdf(-1.64-b_over_sigma,0,1);
-coverage_95  = normcdf(1.96-b_over_sigma,0,1) - normcdf(-1.96-b_over_sigma,0,1);
+coverage_68  = normcdf(norm_cutoff(1)-b_over_sigma,0,1) - normcdf(-norm_cutoff(1)-b_over_sigma,0,1);
+coverage_90  = normcdf(norm_cutoff(2)-b_over_sigma,0,1) - normcdf(-norm_cutoff(2)-b_over_sigma,0,1);
+coverage_95  = normcdf(norm_cutoff(3)-b_over_sigma,0,1) - normcdf(-norm_cutoff(3)-b_over_sigma,0,1);
 
 %% PLOT RESULTS
 
@@ -26,6 +32,7 @@ settings.colors.lgrey  = [200/255 200/255 200/255];
 settings.colors.grey   = [170/255 170/255 170/255];
 settings.colors.blue   = [116/255 158/255 178/255];
 settings.colors.lblue  = 0.5 * settings.colors.blue + 0.5 * [1 1 1];
+settings.colors.dblue  = 0.7 * settings.colors.blue + 0.3 * [0 0 0];
 
 plot_folder = '_figures/uncertainty';
 mkdir(plot_folder)
@@ -36,15 +43,17 @@ set(gca,'Position', pos)
 set(gca,'FontSize',17)
 set(gca,'TickLabelInterpreter','latex')
 hold on
+plot(b_over_sigma,coverage_68,'linewidth',4,'linestyle',':','color',settings.colors.lblue);
+hold on
 plot(b_over_sigma,coverage_90,'linewidth',4,'linestyle','-','color',settings.colors.blue);
 hold on
-plot(b_over_sigma,coverage_95,'linewidth',4,'linestyle','-.','color',settings.colors.lblue);
+plot(b_over_sigma,coverage_95,'linewidth',4,'linestyle','-.','color',settings.colors.dblue);
 hold off
 set(gcf,'color','w')
-xlabel('$|b| / \sigma_{\delta}$','interpreter','latex','FontSize',18)
-ylabel('VAR CI Coverage','interpreter','latex','FontSize',18)
+xlabel('$|b_h(p)| / \tau_{h,VAR}(p)$','interpreter','latex','FontSize',20)
+ylabel('VAR CI Coverage','interpreter','latex','FontSize',20)
 yticks([0:0.2:1])
-legend({'90\% target coverage','95\% target coverage'},'Location','Northeast','fontsize',17,'interpreter','latex')
+legend({'68\% target','90\% target','95\% target'},'Location','Northeast','fontsize',20,'interpreter','latex')
 grid on
 hold off
 
