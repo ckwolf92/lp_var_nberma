@@ -118,7 +118,7 @@ function [irs, ses, cis_dm, cis_boot, ses_bootstrap] = ir_estim(Y, p, horzs, var
             % contemporaneous innovation
             w   = [Y(:, 1:ip.Results.innov_ind-1), lagmatrix(Y, 1:p)];
             w   = w(p+1:end, :);            
-            irs = LP_CorrectBias(irs, w);
+            irs = lp_biascorr(irs, w);
         end
         
     end

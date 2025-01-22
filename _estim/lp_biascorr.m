@@ -1,4 +1,4 @@
-function IRF_corr = LP_CorrectBias(IRF, w)
+function IRF_corr = lp_biascorr(IRF, w)
 
     % LP bias correction
     % "BCC" estimator in Herbst & Johanssen (2022)
