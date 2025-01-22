@@ -1,6 +1,5 @@
 function y = sim_arma11(T, rho, alpha, sigma2)
-% gen_arma11  Generate ARMA(1,1) process with AR parameter with Gaussian
-%             shocks
+% gen_arma11  Generate ARMA(1,1) process with Gaussian shocks
 %
 % Model: y_t = rho y_t-1 + epsilon_t + alpha*epsilon_t-1
 % Input:

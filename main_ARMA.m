@@ -138,10 +138,10 @@ results.vce   = var(results.estims,1,4);
 close all
 
 % Set colors
-colors.blue    = [102/255 178/255 255/255];
-colors.lblue   = 0.4 * colors.blue + 0.6 * [1 1 1];
-colors.red     = [204/255 0/255 0/255];
-colors.lred    = 0.4 * colors.red + 0.6 * [1 1 1];
+colors.blue  = [102/255 178/255 255/255];
+colors.lblue = 0.4 * colors.blue + 0.6 * [1 1 1];
+colors.red   = [204/255 0/255 0/255];
+colors.lred  = 0.4 * colors.red + 0.6 * [1 1 1];
 
 BW          = .02;  % Bin width
 h           = 2;    % Horizon
@@ -153,18 +153,18 @@ figure('Visible', 'on', 'Units', 'inches', 'Position', [2 2 6 3])
 % Histogram version
 p_lp = histogram(estims_dist(2,:), 'EdgeColor', colors.blue, 'FaceAlpha', .3,...
     'BinWidth', BW, 'FaceColor',colors.blue, 'EdgeAlpha', .3,...
-    'Normalization','probability');
+    'Normalization', 'probability');
 hold on
 p_var = histogram(estims_dist(1,:), 'EdgeColor', colors.red, 'FaceAlpha', .5, ...
     'BinWidth', BW, 'FaceColor', colors.red, 'EdgeAlpha', .5,...
-    'Normalization','probability');
+    'Normalization', 'probability');
 
 ylabel('Probability', 'Interpreter','latex')
 set(gca,'TickLabelInterpreter','latex', 'FontSize', 12)
 
 plot(dgp.irs_true(i_dgp,h+1)*ones(2,1), ylim, 'Color', 'k', ...
     'LineStyle', '--', 'LineWidth', 1)
-legend([p_lp, p_var], {'LP(1)', 'VAR(1)'}, 'Interpreter','latex', ...
+legend([p_lp, p_var], {'LP(1)', 'VAR(1)'}, 'Interpreter', 'latex', ...
     'Location', 'northeast')
 grid on;
 exportgraphics(gcf, fullfile(plot_folder, 'arma_lpvar_dens.eps'))
@@ -230,7 +230,7 @@ function plot_biasstd(horzs, bias2, vce, lgd_lab, line_styles, Cols, yl)
 LW     = 2;  % Line width
 n_spec = size(bias2, 1);
 fs     = 14;  % Font size
-figure('Visible','on', 'Units','inches', 'Position', [2 2 6 4])
+figure('Visible', 'on', 'Units', 'inches', 'Position', [2 2 6 4])
 p = [];
 for i = 1:n_spec
     subplot(5, 2, [1 3 5 7])
@@ -238,7 +238,7 @@ for i = 1:n_spec
         'Color', Cols(i, :), 'LineStyle', line_styles{i}, 'LineWidth', LW);
     hold on;
     p = [p, p_i];
-    set(gca,'TickLabelInterpreter','latex', 'FontSize', fs)
+    set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', fs)
     grid on;
     ylim(yl)
     xlim(horzs([1 end]))
@@ -249,7 +249,7 @@ for i = 1:n_spec
     plot(horzs, sqrt(vce(i,:)), ...
         'Color', Cols(i, :), 'LineStyle', line_styles{i}, 'LineWidth', LW);
     hold on;
-    set(gca,'TickLabelInterpreter','latex', 'FontSize', fs )
+    set(gca,'TickLabelInterpreter', 'latex', 'FontSize', fs )
 
     grid on;
     ylim(yl)
@@ -258,7 +258,7 @@ for i = 1:n_spec
     title('Std. Dev.', 'Interpreter','latex')
 end
 
-lgd = legend(lgd_lab, 'Interpreter','latex', 'Location','northeast', ...
+lgd = legend(lgd_lab, 'Interpreter','latex', 'Location', 'northeast', ...
     'NumColumns', 3, 'Position',  [0.1272    0.0677    0.7482    0.1056]);
 set(gca, 'FontSize', fs);
 end

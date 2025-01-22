@@ -96,7 +96,7 @@ elseif strcmp(estimand_type, 'obsshock')
                                              'estimator', 'lp' , ...
                                              'bias_corr_var', true, 'bias_corr_lp', true});  
 
-    settings.est.n_lags_fix          = [NaN; 4; 8; NaN; 4; 4; 4];
+    settings.est.n_lags_fix          = [NaN; 4; 8; NaN; 4; NaN; NaN];
     settings.est.system_type         = [repmat({'big'}, 5, 1); repmat({'small'}, 2, 1)]; % small: include only outcome variable and shock
 
 else
