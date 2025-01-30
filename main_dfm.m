@@ -24,6 +24,7 @@ mode_type     = 3; % robustness check mode:
                    % 1 (baseline), 2 (persistent), 3 (salient series),
                    % 4 (more observables), 5 (salient + persistent series)
 sample_length = 'short';  % short (T=100), medium (T=240), long (T=720)
+shock_type    = 'arch';  % either 'arch' or 'iid' (EQ: THIS FUNCTIONALITY IS INCOMPLETE AS OF 1/30)
 
 %% SETTINGS
 
@@ -50,6 +51,10 @@ save_folder = fullfile(save_pre, save_mode_dir);
 DFM_estimate = DFM_est(DF_model.n_fac, DF_model.n_lags_fac, DF_model.n_lags_uar, ...
     DF_model.reorder, DF_model.levels, DF_model.coint_rank);
 
+if strcmp(shock_type, 'arch')
+    DFM_estimate = arch_DFM(DFM_estimate);
+end
+
 % extract and store estimated DFM parameters
 
 DF_model.Phi           = DFM_estimate.Phi;
@@ -60,6 +65,9 @@ DF_model.delta         = DFM_estimate.delta;
 DF_model.sigma_v       = DFM_estimate.sigma_v;
 
 [DF_model.n_y,DF_model.n_fac] = size(DF_model.Lambda);
+
+
+
 
 %----------------------------------------------------------------
 % Represent as Model in ABCD Form

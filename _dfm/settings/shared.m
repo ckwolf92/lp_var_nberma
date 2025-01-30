@@ -111,7 +111,7 @@ settings.est.n_lags_max  = 10;
 %----------------------------------------------------------------
 
 settings.est.no_const  = false; % true: omit intercept
-settings.est.se_homosk = true; % true: homoskedastic ses
+settings.est.se_homosk = false; % true: homoskedastic ses
 settings.est.alpha     = 0.1; % significance level
 settings.est.boot_num  = 500;  % number of bootstrap samples
 settings.est.bootstrap = 'var';  % VAR bootstrap

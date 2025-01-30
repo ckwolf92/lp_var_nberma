@@ -91,6 +91,7 @@ DFM.Sigma_eta  = fac_est_out.varout.seps; % var-cov matrix for reduced-form shoc
 DFM.sigma_v    = factor_model.uar_ser_mat;
 DFM.delta      = factor_model.uar_coef_mat;
 DFM.v          = fac_est_out.res_mat;
+DFM.uar_res    = factor_model.uar_resid_mat;
 
 if levels
     DFM.vecm = fac_est_out.vecm;
@@ -108,10 +109,11 @@ DFM.factor_shock_time_range = [1959 2014.75 4]; % (start, end, freq)
 
 %% REORDER VARIABLES TO MATCH VARIABLE LIST IN S&W (2016)
 
-DFM.Lambda(reorder, :) = DFM.Lambda;
-DFM.sigma_v(reorder) = DFM.sigma_v;
-DFM.delta(reorder, :) = DFM.delta;
-DFM.v(reorder, :) = DFM.v;
+DFM.Lambda(reorder, :)  = DFM.Lambda;
+DFM.sigma_v(reorder)    = DFM.sigma_v;
+DFM.delta(reorder, :)   = DFM.delta;
+DFM.v(reorder, :)       = DFM.v;
+DFM.uar_res(reorder, :) = DFM.uar_res;
 
 DFM.bpnamevec(reorder) = DFM.bpnamevec;
 DFM.bplabvec_long(reorder) = DFM.bplabvec_long;
