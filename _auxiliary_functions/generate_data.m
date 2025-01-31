@@ -20,9 +20,21 @@ D = model.ABCD.D;
 
 shock_weight = settings.est.shock_weight;
 
+if strcmp(model.shock_type, 'arch')
+    arch_all = [model.arch_fac;model.arch_uar];
+end
+
 % draw shocks
 
-data_e = randn(T_burn+T,n_e);
+if strcmp(model.shock_type, 'iid')
+    data_e = randn(T_burn+T,n_e);
+elseif strcmp(model.shock_type, 'arch')
+    data_e = NaN(T_burn+T,n_e);
+    for i_e = 1:n_e
+        arch_mdl = garch(Constant=1-arch_all(i_e),GARCH=0,ARCH=arch_all(i_e));
+        [~,data_e(:,i_e)] = simulate(arch_mdl,T_burn+T);
+    end
+end
 
 % simulate states & measurement error
 
@@ -36,7 +48,6 @@ end
 % simulate observables
 
 data_y = data_s(T_burn:end-1,:)*C' + data_e(T_burn+1:end,:)*D';
-% data_y = [0;data_s(1:end-1,:)]*C' + data_e(T_burn+1:end,:)*D';
 
 % collect results and shift timing
 

@@ -66,8 +66,9 @@ DF_model.sigma_v       = DFM_estimate.sigma_v;
 
 [DF_model.n_y,DF_model.n_fac] = size(DF_model.Lambda);
 
-
-
+DF_model.shock_type    = shock_type;
+DF_model.arch_uar      = DFM_estimate.arch_uar;
+DF_model.arch_fac      = DFM_estimate.arch_fac;
 
 %----------------------------------------------------------------
 % Represent as Model in ABCD Form
