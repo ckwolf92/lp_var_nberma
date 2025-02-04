@@ -23,8 +23,8 @@ estimand_type = 'obsshock'; % structural estimand: either 'obsshock' or 'recursi
 mode_type     = 3; % robustness check mode:
                    % 1 (baseline), 2 (persistent), 3 (salient series),
                    % 4 (more observables), 5 (salient + persistent series)
-sample_length = 'short';  % short (T=100), medium (T=240), long (T=720)
-shock_type    = 'arch';  % either 'arch' or 'iid' (EQ: THIS FUNCTIONALITY IS INCOMPLETE AS OF 1/30)
+sample_length = 'medium';  % short (T=100), medium (T=240), long (T=720)
+shock_type    = 'arch';  % either 'arch' or 'iid' 
 
 %% SETTINGS
 
@@ -50,10 +50,8 @@ save_folder = fullfile(save_pre, save_mode_dir);
 
 DFM_estimate = DFM_est(DF_model.n_fac, DF_model.n_lags_fac, DF_model.n_lags_uar, ...
     DF_model.reorder, DF_model.levels, DF_model.coint_rank);
+set_shocks;
 
-if strcmp(shock_type, 'arch')
-    DFM_estimate = arch_DFM(DFM_estimate);
-end
 
 % extract and store estimated DFM parameters
 
@@ -66,9 +64,6 @@ DF_model.sigma_v       = DFM_estimate.sigma_v;
 
 [DF_model.n_y,DF_model.n_fac] = size(DF_model.Lambda);
 
-DF_model.shock_type    = shock_type;
-DF_model.arch_uar      = DFM_estimate.arch_uar;
-DF_model.arch_fac      = DFM_estimate.arch_fac;
 
 %----------------------------------------------------------------
 % Represent as Model in ABCD Form
@@ -260,6 +255,6 @@ results.vce = var(results.estims,1,4);
 
 mkdir(save_folder);
 save(fullfile(save_folder, ...
-    strcat('dfm_', dgp_type, '_', estimand_type, '_', sample_length)), ...
+    strcat('dfm_', dgp_type, '_', estimand_type, '_', sample_length, '_', shock_type)), ...
     'DFM_estimate','DF_model','settings','results',...
-    'dgp_type','estimand_type','mode_type', 'sample_length', '-v7.3'); % save results
+    'dgp_type','estimand_type','mode_type', 'sample_length', 'shock_type', '-v7.3'); % save results

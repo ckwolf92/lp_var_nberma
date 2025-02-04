@@ -37,6 +37,6 @@ for i = 1:length(arch_fac)  % Factors
 end
 
 DFM_estimate.arch_uar = arch_uar;
-DFM_estimate.arch_fac = arch_fac ;
+DFM_estimate.arch_fac = arch_fac;
 
 end
