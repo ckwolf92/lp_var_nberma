@@ -1,4 +1,4 @@
-function Y_boot = var_boot(A, res, Y, p, homosk, no_const)
+function Y_boot = var_boot(A, res, Y, p, l, no_const)
 
     % VAR residual bootstrap, homoskedastic or wild
     
@@ -9,7 +9,7 @@ function Y_boot = var_boot(A, res, Y, p, homosk, no_const)
     % res       T_res x n   residuals
     % Y         T x n       data vector
     % p         1 x 1       lag length
-    % homosk    bool        true: homoskedastic bootstrap, false: wild bootstrap
+    % l                     l >=1 block bootstrap (=1 for homosk). 'wild' for wild bootstrap. 
     % no_const  bool        true: exclude intercept from bootstrap samples
     
     % Outputs:
@@ -30,11 +30,40 @@ function Y_boot = var_boot(A, res, Y, p, homosk, no_const)
         c = A(:,end);
     end
 
-    % Draw residuals
-    if homosk % I.i.d. bootstrap
-        res_boot = res(randi(T_res,T_res,1),:);
-    else % Wild bootstrap
-        res_boot = randn(T_res,1).*res;
+    if ischar(l)
+        if strcmp(l, 'wild')  % wild bootstrap
+            res_boot = randn(T_res,1).*res;
+        end
+
+    else  % Block bootstrap
+
+        % Setup
+        n_blocks = ceil(T_res/l);
+        res_boot = nan(size(res));
+        
+        % Draw blocks
+        i_blocks            = randi([0, T_res-l], n_blocks, 1);  
+        ind_blocks          = reshape(i_blocks + cumsum(ones(n_blocks, l), 2), [], 1);
+        ind_blocks          = ind_blocks(1:T_res);
+        res_boot_uncentered = res(ind_blocks,:);
+
+        % Recenter, vectorized
+        res_center = filter(ones(1, T_res-l+1)/(T_res-l+1), 1, res);
+        res_center = res_center(end-l+1:end, :);
+        res_center = reshape(permute(repmat(res_center, 1, 1,n_blocks), [1,3,2]), n_blocks*l, []);
+        res_center = res_center(1:T_res, :);
+        res_boot   = res_boot_uncentered - res_center;
+
+        % Recenter, unvectorized
+        % for s = 1:l
+        %     for j=0:n_blocks-1
+        %         if j*l+s <= T_res
+        %             res_boot(j*l+s, :) = res_boot_uncentered(j*l+s, :) - ...
+        %                                  mean(res(s+(0:T_res-l), :), 1);
+        %         end
+        %     end
+        % end
+        
     end
     
     % Generate VAR(p) data, with residuals and initial conditions as above
