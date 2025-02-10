@@ -52,7 +52,6 @@ DFM_estimate = DFM_est(DF_model.n_fac, DF_model.n_lags_fac, DF_model.n_lags_uar,
     DF_model.reorder, DF_model.levels, DF_model.coint_rank);
 set_shocks;
 
-
 % extract and store estimated DFM parameters
 
 DF_model.Phi           = DFM_estimate.Phi;
@@ -63,7 +62,6 @@ DF_model.delta         = DFM_estimate.delta;
 DF_model.sigma_v       = DFM_estimate.sigma_v;
 
 [DF_model.n_y,DF_model.n_fac] = size(DF_model.Lambda);
-
 
 %----------------------------------------------------------------
 % Represent as Model in ABCD Form
