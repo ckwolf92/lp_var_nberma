@@ -3,7 +3,7 @@ if strcmp(shock_type, 'arch')
     DFM_estimate      = arch_DFM(DFM_estimate);
     DF_model.arch_uar = DFM_estimate.arch_uar;
     DF_model.arch_uar(DF_model.arch_uar>DF_model.censor_arch_uar) = DF_model.censor_arch_uar;
-    DF_model.arch_fac = DFM_estimate.arch_fac*0 + mean(DFM_estimate.arch_fac);
+    DF_model.arch_fac = DFM_estimate.arch_fac*0 + max(DFM_estimate.arch_fac);  % Set to max
 else  % iid case (arch parameters are unused)
     DF_model.arch_uar = [];
     DF_model.arch_fac = [];    

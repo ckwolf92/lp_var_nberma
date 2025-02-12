@@ -7,7 +7,7 @@ DF_model.n_fac      = 6; % number of factors
 DF_model.coint_rank = 2; % cointegration rank in factor process (for levels specification); []: estimate using Johansen test
 DF_model.n_lags_fac = 2; % lag order of factors
 DF_model.n_lags_uar = 2; % lag order of measurement error
-DF_model.censor_arch_uar = .9;% cutoff for right-censoring ARCH parameter when shock_type='arch'
+DF_model.censor_arch_uar = .99;  % cutoff for right-censoring ARCH parameter when shock_type='arch'
 
 %% PREPARATIONS FOR STRUCTURAL ESTIMANDS
 
@@ -73,29 +73,38 @@ settings.misspec.zeta         = 0.5; % local-to-VAR coefficient
 %% ESTIMATION SETTINGS
 
 %----------------------------------------------------------------
-% Define Estimators
+% Define no shrinkage VAR and LP estimators
 %----------------------------------------------------------------
 
 if strcmp(estimand_type, 'recursive')
 
-    [settings.est.methods{1:3}] = deal({'resp_ind',  [], 'innov_ind', [], ...
+    [settings.est.methods{1:3}] = deal({'resp_ind' , [], ...
+                                        'innov_ind', [], ...
+                                        'bootstrap', 'var',...
                                         'estimator', 'var', ...
-                                        'bias_corr_var', true, 'bias_corr_lp', true});  % VAR
-    [settings.est.methods{4:5}] = deal({'resp_ind',  [], 'innov_ind', [], ...
-                                        'estimator', 'lp' , ...
-                                        'bias_corr_var', true, 'bias_corr_lp', true});  % LP
+                                        'shrinkage', false});  % VAR
+    
+    [settings.est.methods{4:5}] = deal({'resp_ind'  , [], ...
+                                        'innov_ind' , [], ...
+                                        'bootstrap', 'var',...                                        
+                                        'estimator' , 'lp' , ...
+                                        'shrinkage' , false});  % LP
 
     settings.est.n_lags_fix     = [NaN; 4; 8; NaN; 4];
     settings.est.system_type    = repmat({'big'}, 5, 1);
 
 elseif strcmp(estimand_type, 'obsshock')
 
-   [settings.est.methods{[1:3, 6]}] = deal({'resp_ind',  [], 'innov_ind', [], ...
-                                           'estimator', 'var', ...
-                                           'bias_corr_var', true, 'bias_corr_lp', true});  
-   [settings.est.methods{[4:5, 7]}] = deal({'resp_ind',  [], 'innov_ind', [], ...
-                                            'estimator', 'lp' , ...
-                                            'bias_corr_var', true, 'bias_corr_lp', true});  
+   [settings.est.methods{[1:3, 6]}] = deal({'resp_ind' , [], ...
+                                            'innov_ind', [], ...
+                                           'bootstrap', 'var',...                                            
+                                           'estimator' , 'var', ...
+                                           'shrinkage' , false});  
+   [settings.est.methods{[4:5, 7]}] = deal({'resp_ind' ,  [], ...
+                                           'innov_ind' , [], ...
+                                           'bootstrap', 'var',...                                           
+                                           'estimator', 'lp' ,...
+                                           'shrinkage', false});  
 
     settings.est.n_lags_fix          = [NaN; 4; 8; NaN; 4; NaN; NaN];
     settings.est.system_type         = [repmat({'big'}, 5, 1); repmat({'small'}, 2, 1)]; % small: include only outcome variable and shock
@@ -104,29 +113,76 @@ else
     error('Enter valid estimand_type...')
 end
 
-settings.est.est_n_lag   = isnan(settings.est.n_lags_fix);  % Indicator if lags are estimated
-settings.est.n_lags_max  = 10;
+% -------------------------------------------------------------------------
+% Smoothed LP and BVAR settings
+% -------------------------------------------------------------------------
+
+% Smoothed LP defaults
+opts_slp.lambdaRange   = [0.001:0.005:0.021, 0.05:0.1:1.05, ...
+                          2:1:19, 20:20:100, 200:200:2000];  % CV grid, scaled by T
+opts_slp.CV_folds      = 5;                                  % # CV folds
+opts_slp.irfLimitOrder = 2;                                  % Shrink towards polynomial of that order
+opts_slp.undersmooth   = false;                              % Multiply optimal lambda by 0.1? 
+
+% (Under-)smoothed LP defaults
+opts_slp_undersmooth             = opts_slp;
+opts_slp_undersmooth.undersmooth = true;
+
+% BVAR defaults
+if mode_type == 5
+    opts_bvar.RW = true;    % Random walk prior
+else
+    opts_bvar.RW = false;    % WN prior
+end
+opts_bvar.ndraw = 500;  % Posterior draws
+
+% Add to methods objects
+settings.est.methods{end+1} = {'resp_ind',  [], ...   BVAR
+                               'innov_ind', [],...
+                               'estimator', 'var',...
+                               'bootstrap', [],...
+                               'shrinkage', true,...
+                               'opts_bvar', opts_bvar};
+settings.est.methods{end+1} = {'resp_ind',  [], ...  SLP, default
+                               'innov_ind', [],...
+                               'estimator', 'lp', ...
+                               'bootstrap', [],...
+                               'shrinkage', true, ...
+                               'opts_slp',  opts_slp};
+settings.est.methods{end+1} = {'resp_ind',  [], ...  SLP, under-smoothed
+                               'innov_ind', [],...
+                               'estimator', 'lp', ...
+                               'bootstrap', [],...                               
+                               'shrinkage', true, ...
+                               'opts_slp',  opts_slp_undersmooth};
+settings.est.n_lags_fix          = [settings.est.n_lags_fix; 4; NaN;NaN];
+settings.est.system_type         = [settings.est.system_type; repmat({'big'}, 3, 1)];
+
+
+
+settings.est.est_n_lag  = isnan(settings.est.n_lags_fix);  % Indicator if lags are estimated
+settings.est.n_lags_max = 10;
+settings.est.n_methods  = length(settings.est.methods); % number of estimation methods
 
 %----------------------------------------------------------------
 % Shared settings
 %----------------------------------------------------------------
-
-settings.est.no_const  = false; % true: omit intercept
-settings.est.se_homosk = false; % true: homoskedastic ses
-settings.est.alpha     = 0.1; % significance level
-settings.est.boot_num  = 500;  % number of bootstrap samples
-settings.est.bootstrap = 'var';  % VAR bootstrap
+settings.est.alpha            = 0.1; % significance level. 1-alpha credible interval for BVAR.
+settings.est.no_const         = false; % true: omit intercept
+settings.est.se_homosk        = false; % true: homoskedastic ses
+settings.est.boot_num         = 500;   % number of bootstrap samples
+settings.est.boot_blocklength = ceil(5.03*settings.simul.T^(1/4));  % Jentsch and Lunsford (2019) page 2665
+settings.est.bias_corr_var    = true;  % Pope (1990) VAR bias correction
+settings.est.bias_corr_lp     = true;  % HJ (2024) LP bias correction
 
 settings.est.methods_shared = {
-                               'alpha',     settings.est.alpha,...
-                               'no_const',  settings.est.no_const,...
-                               'se_homosk', settings.est.se_homosk,...
-                               'boot_num',  settings.est.boot_num,...
-                               'bootstrap', settings.est.bootstrap};
+                               'alpha'        , settings.est.alpha,...
+                               'no_const'     , settings.est.no_const,...
+                               'se_homosk'    , settings.est.se_homosk,...
+                               'boot_num'     , settings.est.boot_num,...
+                               'bias_corr_var', settings.est.bias_corr_var,...
+                               'bias_corr_lp' , settings.est.bias_corr_lp};
 
-% number of estimation methods
-
-settings.est.n_methods = length(settings.est.methods);
 
 %% PARALLELIZATION
 

@@ -1,4 +1,4 @@
-function [irs, ses, cis_dm, cis_boot, ses_bootstrap] = ir_estim(Y, p, horzs, varargin)
+function [irs, ses, cis, cis_boot, ses_bootstrap] = ir_estim(Y, p, horzs, varargin)
 
 % Wrapper function for (V)AR or LP estimation of impulse responses
 % Delta method and bootstrap confidence intervals
@@ -8,12 +8,24 @@ function [irs, ses, cis_dm, cis_boot, ses_bootstrap] = ir_estim(Y, p, horzs, var
 % Outputs:
 % irs       1 x H       estimated impulse responses at select horizons
 % ses       1 x H       s.e. for impulse responses
-% cis_dm    2 x H       lower and upper limits of delta method confidence intervals
+% cis    2 x H          lower and upper limits of delta method confidence
+%                       intervals. Equal-tailed credible interval for BVAR.
 % cis_boot  2 x H x 3   lower and upper limits of bootstrap confidence intervals (3rd index: type of interval, either Efron, Hall, or Hall percentile-t)
 
+%% Defaults for BVAR and smoothed local projection
+
+% SLP defaults
+opts_slp.lambdaRange   = [0.001:0.005:0.021, 0.05:0.1:1.05, ...
+                          2:1:19, 20:20:100, 200:200:2000];  % CV grid, scaled by T
+opts_slp.CV_folds      = 5;                                  % # CV folds
+opts_slp.irfLimitOrder = 2;                                  % Shrink towards polynomial of that order
+opts_slp.undersmooth   = false;                                % Multiply CV lambda by .1? 
+
+% BVAR defaults
+opts_bvar.RW = true;    % Random walk prior?
+opts_bvar.ndraw = 500;  % Posterior draws
 
 %% Parse inputs
-
 ip = inputParser;
 
 % Required inputs
@@ -31,6 +43,12 @@ addParameter(ip, 'innov_ind', 1, @isnumeric);
 % Index of innovation of interest (default: first innovation)
 addParameter(ip, 'estimator', 'lp', @ischar);
 % Estimator type, either 'var' or 'lp' (default: local projection)
+addParameter(ip, 'shrinkage', false, @islogical) 
+% Shrink using smoothed LP or Bayesian VAR? (default: false)
+addParameter(ip, 'opts_slp', opts_slp)
+% Options for smoothed LP (default: see above)
+addParameter(ip, 'opts_bvar', opts_bvar)
+% Options for BVAR (default: see above)
 addParameter(ip, 'alpha', 0.05, @isnumeric);
 % Significance level (default: 0.05)
 addParameter(ip, 'bias_corr_var', true, @islogical);
@@ -67,7 +85,7 @@ cis_boot ...
 
 %% Point estimates and var-cov
 
-if strcmp(ip.Results.estimator, 'var') % VAR
+if strcmp(ip.Results.estimator, 'var') & ~ip.Results.shrinkage % VAR, no shrinkage
 
     % VAR impulse responses
     [irs_all, irs_all_varcov] = var_ir_estim(Y, ...
@@ -82,7 +100,7 @@ if strcmp(ip.Results.estimator, 'var') % VAR
     irs = irs_all(ip.Results.resp_ind,:);
     ses = sqrt(reshape(irs_all_varcov(ip.Results.resp_ind,ip.Results.resp_ind,:),1,[]));
 
-elseif strcmp(ip.Results.estimator, 'lp') % LP
+elseif strcmp(ip.Results.estimator, 'lp') & ~ip.Results.shrinkage % LP, no shrinkage
 
     irs = zeros(1,nh);
 
@@ -123,6 +141,77 @@ elseif strcmp(ip.Results.estimator, 'lp') % LP
         irs = lp_biascorr(irs, w);
     end
 
+elseif strcmp(ip.Results.estimator, 'var') & ip.Results.shrinkage  % Bayesian VAR
+    
+    n_Y = size(Y,2);
+
+    if ip.Results.opts_bvar.RW  % Random walk prior
+        r = bvarGLP(Y, p, 'MNpsi', 0, 'Fcast', 0);
+    else  % White noise prior
+        r = bvarGLP(Y, p, 'MNpsi', 0, 'Fcast', 0, 'sur', 0, 'noc', 0, 'posi', 1:n_Y);
+    end
+
+    if ip.Results.opts_bvar.ndraw == 0 % only use posterior means
+        beta_draws  = r.postmax.betahat;
+        sigma_draws = r.postmax.sigmahat;
+
+    else % draw from posterior
+
+        beta_draws  = nan(1+n_Y*p, n_Y, ip.Results.opts_bvar.ndraw);
+        sigma_draws = nan(n_Y, n_Y, ip.Results.opts_bvar.ndraw);
+
+        for j=1:ip.Results.opts_bvar.ndraw
+            [beta_draws(:,:,j),sigma_draws(:,:,j)] = post_draw(r.postmax.betahat,r.postmax.Sinv,r.postmax.cholZZinv,r.postmax.T);
+        end        
+    end
+
+
+    % IRFs
+    IRF_draws = nan(n_Y, length(horzs), ip.Results.opts_bvar.ndraw);
+
+    for j=1:ip.Results.opts_bvar.ndraw
+        G                = chol(sigma_draws(:,:,j), 'lower');
+        ShockVector      = G(:,ip.Results.innov_ind);
+        IRF_draws(:,:,j) = var_ir(squeeze(beta_draws(2:end,:,j))', ShockVector, horzs);
+    end
+
+    % Organize output
+    irs_all = mean(IRF_draws, 3); % posterior mean of IRF draws (or just single IRF if ndraw=0)
+    cis_all = quantile(IRF_draws, [ip.Results.alpha/2 1-ip.Results.alpha/2], 3);  % Equal-tailed
+    irs     = irs_all(ip.Results.resp_ind, :);
+    cis     = squeeze(cis_all(ip.Results.resp_ind, :, :))';
+    ses     = std(IRF_draws(ip.Results.resp_ind,:,:), [], 3);
+
+elseif strcmp(ip.Results.estimator, 'lp') & ip.Results.shrinkage % LP, shrinkage
+
+    % Covariate matrix
+    Y_lag = lagmatrix(Y, 0:p);
+    Y_lag = Y_lag(p+1:end, :);    
+    y     = Y_lag(:, ip.Results.resp_ind);
+    x     = Y_lag(:, ip.Results.innov_ind);
+    w     = Y_lag(:, [1:ip.Results.innov_ind-1, size(Y,2)+1:end]);  % Contemporaneous and lagged controls    
+
+    % Setup
+    lambdaRange = ip.Results.opts_slp.lambdaRange * size(Y,1); % scale the grid of lambda (penalty strength) by # time periods
+    lambdaRange = [1e-4, lambdaRange, 1e10];                   % allow regular OLS or completely smoothed
+    r           = opts_slp.irfLimitOrder+1;
+    H_min       = 0;
+    H_max       = max(ip.Results.horzs);
+    
+    % Leave-one-out CV 
+    rss_cv             = locproj_cv(y,x,w,H_min,H_max,r,lambdaRange,ip.Results.opts_slp.CV_folds);
+    [~,lambda_opt_loc] = min(rss_cv);
+    lambda_opt         = lambdaRange(lambda_opt_loc); % optimally tuned lambda
+
+    if ip.Results.opts_slp.undersmooth
+        lambda_opt = lambda_opt*.1;
+    end
+
+    % Estimate
+    [irs, ~,~,ses]     = locproj(y,x,w,H_min,H_max,r,lambda_opt); % 
+    irs                = irs(:)';
+    ses                = ses(:)';
+
 end
 
 % If only point estimates and standard errors are requested, stop
@@ -132,9 +221,9 @@ end
 
 
 %% Delta method confidence intervals
-
-cis_dm = irs + [-1; 1]*(cvs.*ses);
-
+if ~(strcmp(ip.Results.estimator, 'var') & ip.Results.shrinkage)  % Not Bayesian VAR
+    cis = irs + [-1; 1]*(cvs.*ses);
+end
 %% Bootstrap confidence intervals
 
 if ~isempty(ip.Results.bootstrap)
