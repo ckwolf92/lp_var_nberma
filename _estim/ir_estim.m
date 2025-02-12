@@ -8,24 +8,27 @@ function [irs, ses, cis, cis_boot, ses_bootstrap] = ir_estim(Y, p, horzs, vararg
 % Outputs:
 % irs       1 x H       estimated impulse responses at select horizons
 % ses       1 x H       s.e. for impulse responses
-% cis    2 x H          lower and upper limits of delta method confidence
+% cis       2 x H       lower and upper limits of delta method confidence
 %                       intervals. Equal-tailed credible interval for BVAR.
 % cis_boot  2 x H x 3   lower and upper limits of bootstrap confidence intervals (3rd index: type of interval, either Efron, Hall, or Hall percentile-t)
 
 %% Defaults for BVAR and smoothed local projection
 
 % SLP defaults
+
 opts_slp.lambdaRange   = [0.001:0.005:0.021, 0.05:0.1:1.05, ...
                           2:1:19, 20:20:100, 200:200:2000];  % CV grid, scaled by T
 opts_slp.CV_folds      = 5;                                  % # CV folds
-opts_slp.irfLimitOrder = 2;                                  % Shrink towards polynomial of that order
-opts_slp.undersmooth   = false;                                % Multiply CV lambda by .1? 
+opts_slp.irfLimitOrder = 2;                                  % shrink towards polynomial of that order
+opts_slp.undersmooth   = false;                              % multiply CV lambda by .1? 
 
 % BVAR defaults
+
 opts_bvar.RW = true;    % Random walk prior?
 opts_bvar.ndraw = 500;  % Posterior draws
 
 %% Parse inputs
+
 ip = inputParser;
 
 % Required inputs
@@ -69,7 +72,6 @@ addParameter(ip, 'boot_workers', 0, @isnumeric);
 % Number of parallel workers used for bootstrapping (default: 0, meaning no parallel computation)
 parse(ip, Y, p, horzs, varargin{:});
 
-
 %% Preliminaries
 
 nh ...
@@ -81,7 +83,6 @@ cvs ...
 
 cis_boot ...
     = nan(2,nh,3);       % Initializes NaN array
-
 
 %% Point estimates and var-cov
 
@@ -133,7 +134,7 @@ elseif strcmp(ip.Results.estimator, 'lp') & ~ip.Results.shrinkage % LP, no shrin
 
     end
 
-    if ip.Results.bias_corr_lp  % Herbst & Johanssen (2024) bias correction
+    if ip.Results.bias_corr_lp  % Herbst & Johannsen (2024) bias correction
         % Include contemporaneous/lagged controls and exclude the
         % contemporaneous innovation
         w   = [Y(:, 1:ip.Results.innov_ind-1), lagmatrix(Y, 1:p)];
@@ -152,6 +153,7 @@ elseif strcmp(ip.Results.estimator, 'var') & ip.Results.shrinkage  % Bayesian VA
     end
 
     if ip.Results.opts_bvar.ndraw == 0 % only use posterior means
+
         beta_draws  = r.postmax.betahat;
         sigma_draws = r.postmax.sigmahat;
 
@@ -165,7 +167,6 @@ elseif strcmp(ip.Results.estimator, 'var') & ip.Results.shrinkage  % Bayesian VA
         end        
     end
 
-
     % IRFs
     IRF_draws = nan(n_Y, length(horzs), ip.Results.opts_bvar.ndraw);
 
@@ -173,6 +174,7 @@ elseif strcmp(ip.Results.estimator, 'var') & ip.Results.shrinkage  % Bayesian VA
         G                = chol(sigma_draws(:,:,j), 'lower');
         ShockVector      = G(:,ip.Results.innov_ind);
         IRF_draws(:,:,j) = var_ir(squeeze(beta_draws(2:end,:,j))', ShockVector, horzs);
+        IRF_draws(:,:,j) = IRF_draws(:,:,j)./IRF_draws(ip.Results.innov_ind,1,j);
     end
 
     % Organize output
@@ -208,22 +210,24 @@ elseif strcmp(ip.Results.estimator, 'lp') & ip.Results.shrinkage % LP, shrinkage
     end
 
     % Estimate
-    [irs, ~,~,ses]     = locproj(y,x,w,H_min,H_max,r,lambda_opt); % 
-    irs                = irs(:)';
-    ses                = ses(:)';
+    [irs,~,~,ses]     = locproj(y,x,w,H_min,H_max,r,lambda_opt);
+    irs               = irs(:)';
+    ses               = ses(:)';
 
 end
 
 % If only point estimates and standard errors are requested, stop
+
 if nargout<=2
     return;
 end
 
-
 %% Delta method confidence intervals
+
 if ~(strcmp(ip.Results.estimator, 'var') & ip.Results.shrinkage)  % Not Bayesian VAR
     cis = irs + [-1; 1]*(cvs.*ses);
 end
+
 %% Bootstrap confidence intervals
 
 if ~isempty(ip.Results.bootstrap)
@@ -255,9 +259,8 @@ if ~isempty(ip.Results.bootstrap)
 
         end
 
-
-
     else  % Residual or pair bootstrap
+
         pseudo_truth = irs;
         
         parfor(b=1:ip.Results.boot_num, ip.Results.boot_workers)
@@ -276,7 +279,10 @@ if ~isempty(ip.Results.bootstrap)
         end
     
     end
+
     % Compute bootstrap confidence intervals
+
     cis_boot      = boot_ci(pseudo_truth, irs, ses, estims_boot, ses_boot, ip.Results.alpha);
-    ses_bootstrap = std( estims_boot);
+    ses_bootstrap = std(estims_boot);
+
 end

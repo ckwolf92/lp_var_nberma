@@ -49,7 +49,7 @@ save_folder = fullfile(save_pre, save_mode_dir);
 % estimate DFM from dataset
 
 DFM_estimate = DFM_est(DF_model.n_fac, DF_model.n_lags_fac, DF_model.n_lags_uar, ...
-    DF_model.reorder, DF_model.levels, DF_model.coint_rank);
+                        DF_model.reorder, DF_model.levels, DF_model.coint_rank);
 set_shocks;
 
 % extract and store estimated DFM parameters
@@ -163,7 +163,7 @@ parfor (i_mc = 1:n_mc, settings.sim.num_workers)
 
             [i_rep_estims(i_method,:),i_rep_ses(i_method,:),i_cis_dm,i_cis_boot] ...
                 = ir_estim(data_y, nlags, 0:settings.est.IRF_hor-1, ...
-                settings.est.methods_shared{:}, settings.est.methods{i_method}{:});
+                            settings.est.methods_shared{:}, settings.est.methods{i_method}{:});
 
             i_rep_cis_lower(i_method,:,1)     = i_cis_dm(1,:);
             i_rep_cis_upper(i_method,:,1)     = i_cis_dm(2,:);

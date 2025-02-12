@@ -7,7 +7,8 @@ DF_model.n_fac      = 6; % number of factors
 DF_model.coint_rank = 2; % cointegration rank in factor process (for levels specification); []: estimate using Johansen test
 DF_model.n_lags_fac = 2; % lag order of factors
 DF_model.n_lags_uar = 2; % lag order of measurement error
-DF_model.censor_arch_uar = .99;  % cutoff for right-censoring ARCH parameter when shock_type='arch'
+
+DF_model.censor_arch_uar = 0.99;  % cutoff for right-censoring ARCH parameter when shock_type='arch'
 
 %% PREPARATIONS FOR STRUCTURAL ESTIMANDS
 
@@ -72,6 +73,14 @@ settings.misspec.zeta         = 0.5; % local-to-VAR coefficient
 
 %% ESTIMATION SETTINGS
 
+% current list, for recursive:
+% VAR AIC, VAR 4, VAR 8, LP AIC, LP 4, BVAR, default SLP, under-smoothed
+% SLP
+
+% current list, for observed shock:
+% VAR AIC, VAR 4, VAR 8, LP AIC, LP 4, VAR AIC small, LP AIC small, BVAR,
+% default SLP, under-smoothed SLP
+
 %----------------------------------------------------------------
 % Define no shrinkage VAR and LP estimators
 %----------------------------------------------------------------
@@ -110,7 +119,9 @@ elseif strcmp(estimand_type, 'obsshock')
     settings.est.system_type         = [repmat({'big'}, 5, 1); repmat({'small'}, 2, 1)]; % small: include only outcome variable and shock
 
 else
+
     error('Enter valid estimand_type...')
+    
 end
 
 % -------------------------------------------------------------------------
@@ -118,25 +129,29 @@ end
 % -------------------------------------------------------------------------
 
 % Smoothed LP defaults
+
 opts_slp.lambdaRange   = [0.001:0.005:0.021, 0.05:0.1:1.05, ...
                           2:1:19, 20:20:100, 200:200:2000];  % CV grid, scaled by T
 opts_slp.CV_folds      = 5;                                  % # CV folds
-opts_slp.irfLimitOrder = 2;                                  % Shrink towards polynomial of that order
-opts_slp.undersmooth   = false;                              % Multiply optimal lambda by 0.1? 
+opts_slp.irfLimitOrder = 2;                                  % shrink towards polynomial of that order
+opts_slp.undersmooth   = false;                              % multiply optimal lambda by 0.1? 
 
 % (Under-)smoothed LP defaults
+
 opts_slp_undersmooth             = opts_slp;
 opts_slp_undersmooth.undersmooth = true;
 
 % BVAR defaults
+
 if mode_type == 5
-    opts_bvar.RW = true;    % Random walk prior
+    opts_bvar.RW = true;    % random walk prior
 else
     opts_bvar.RW = false;    % WN prior
 end
 opts_bvar.ndraw = 500;  % Posterior draws
 
 % Add to methods objects
+
 settings.est.methods{end+1} = {'resp_ind',  [], ...   BVAR
                                'innov_ind', [],...
                                'estimator', 'var',...
@@ -158,15 +173,14 @@ settings.est.methods{end+1} = {'resp_ind',  [], ...  SLP, under-smoothed
 settings.est.n_lags_fix          = [settings.est.n_lags_fix; 4; NaN;NaN];
 settings.est.system_type         = [settings.est.system_type; repmat({'big'}, 3, 1)];
 
-
-
-settings.est.est_n_lag  = isnan(settings.est.n_lags_fix);  % Indicator if lags are estimated
+settings.est.est_n_lag  = isnan(settings.est.n_lags_fix);  % indicator if lags are estimated
 settings.est.n_lags_max = 10;
 settings.est.n_methods  = length(settings.est.methods); % number of estimation methods
 
 %----------------------------------------------------------------
 % Shared settings
 %----------------------------------------------------------------
+
 settings.est.alpha            = 0.1; % significance level. 1-alpha credible interval for BVAR.
 settings.est.no_const         = false; % true: omit intercept
 settings.est.se_homosk        = false; % true: homoskedastic ses
