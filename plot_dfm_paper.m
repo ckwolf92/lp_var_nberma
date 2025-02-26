@@ -28,15 +28,15 @@ mode_type     = 6; % robustness check mode:
                    % 1 (baseline), 2 (persistent), 3 (salient series),
                    % 4 (more observables), 5 (salient + persistent series),
                    % 6 (combine 3 & 5)
+sample_length = 'medium'; % short (T=100), medium (T=240), long (T=720)
+shock_type    = 'arch'; % 'iid' or 'arch'
 
 %----------------------------------------------------------------
 % Load
 %----------------------------------------------------------------
 
 mode_list   = {'baseline', 'persistent', 'salient', 'more', 'persistent_salient', 'salient_all'};
-
-load_pre = '_results_small_2025_0115';
-
+load_pre    = '_results_small_2025_0225';
 covg_cutoff = 0.8; % cut-off for coverage indicator plots
 
 if mode_type <= 5
@@ -71,7 +71,7 @@ elseif mode_type == 6
     results.p = [results_1.p;results_2.p];
 
     results.coverage_prob  = [results_1.coverage_prob;results_2.coverage_prob];
-    results.coverage_avg   = mean(results.coverage_prob,1);
+    results.coverage_avg   = mean(min(results.coverage_prob,0.9),1);
     results.coverage_indic = mean(results.coverage_prob >= covg_cutoff,1);
 
     results.median_length = [results_1.median_length;results_2.median_length];  
@@ -88,8 +88,9 @@ clear covg_cutoff
 
 % procedure names
 
-settings.est.names = {'VAR$_{AIC}$', 'VAR$_{4}$', 'VAR$_{8}$', 'LP$_{AIC}$', 'LP$_{4}$', ...
-    'VAR$_{AIC, small}$', 'LP$_{AIC, small}$', 'VAR$_{b, AIC}$', 'LP$_{b, AIC}$', 'VAR$_{b, 4}$', 'LP$_{b, 4}$'};
+settings.est.names = {'VAR$_{AIC}$', 'VAR$_{4}$', 'VAR$_{8}$', 'VAR$_{AIC, hom.}$', 'LP$_{AIC}$', 'LP$_{4}$',...
+              'LP$_{AIC, hom.}$', 'BVAR$_{4}$', 'SLP$_{4, base}$', 'SLP$_{4}$', 'VAR$_{AIC, small}$', 'LP$_{AIC, small}$', ...
+              'VAR$_{b, AIC}$', 'LP$_{b, AIC}$', 'VAR$_{b, 4}$', 'LP$_{b, 4}$'};
 
 %% GENERATE FIGURES
 
@@ -101,7 +102,7 @@ settings.est.names = {'VAR$_{AIC}$', 'VAR$_{4}$', 'VAR$_{8}$', 'LP$_{AIC}$', 'LP
 
 plot_pre    = '_figures';
 plot_folder = fullfile(plot_pre, load_mode_dir);
-plot_folder = fullfile(plot_folder, strcat(dgp_type_plot, '_', estimand_type));
+plot_folder = fullfile(plot_folder, strcat(dgp_type_plot, '_', estimand_type, '_', shock_type));
 mkdir(plot_folder)
 
 % plot objects
@@ -110,20 +111,30 @@ horzs = settings.est.IRF_select - 1;
 
 % lines
 
-colors.blue  = [102/255 178/255 255/255];
-colors.dblue = 0.7 * colors.blue;
-colors.lblue = 0.4 * colors.blue + 0.6 * [1 1 1];
-colors.red   = [204/255 0/255 0/255];
-colors.dred  = 0.7 * colors.red;
-colors.lred  = 0.4 * colors.red + 0.6 * [1 1 1];
+colors.blue    = [102/255 178/255 255/255];
+colors.dblue   = 0.7 * colors.blue;
+colors.lblue   = 0.4 * colors.blue + 0.6 * [1 1 1];
+colors.red     = [204/255 0/255 0/255];
+colors.dred    = 0.7 * colors.red;
+colors.lred    = 0.4 * colors.red + 0.6 * [1 1 1];
+colors.brown   = [102/255 0/255 0/255];
+colors.lbrown  = 0.5 * colors.brown + 0.5 * [1 1 1];
+colors.purple  = [153/255 0/255 153/255];
+colors.lpurple = 0.5 * colors.purple + 0.5 * [1 1 1];
 
-line_colors = [colors.red; colors.dred; colors.dred; ...
-                colors.blue; colors.dblue; ...
+line_colors = [colors.red; colors.dred; colors.dred; colors.red; ...
+                colors.blue; colors.dblue; colors.blue; ...
+                colors.lbrown; colors.lpurple; colors.lpurple; ...
                 colors.lred; colors.lblue; ...
-                colors.red; colors.blue; ...
-                colors.dred; colors.dblue];
+                colors.red; colors.blue; colors.dred; colors.dblue];
 
-line_specs = {'-', ':', ':', '-', ':', ':', ':', '-.', '-.', '-.', '-.'};
+line_specs = {'-', ':', ':', '-', ...
+    '-', ':', '-', ...
+    '-.', '-.', '-.', ...
+    ':', ':', ...
+    '-.', '-.', '-.', '-.'}; 
+
+% need to add the boostraps: '-.', '-.', '-.', '-.'};
 
 line_width = 5 * ones(length(line_specs),1);
 
@@ -134,9 +145,9 @@ line_width = 5 * ones(length(line_specs),1);
 % preparations
 
 if strcmp(estimand_type,'obsshock')
-    proc_estim_indic = [1 2 6 4 5 7];
+    proc_estim_indic = [1 2 11 5 6 12];
 elseif strcmp(estimand_type,'recursive')
-    proc_estim_indic = [1 2 4 5];
+    proc_estim_indic = [1 2 5 6];
 end
 
 proc_estim    = settings.est.names(proc_estim_indic);
@@ -203,11 +214,13 @@ end
 % preparations
 
 if strcmp(estimand_type,'obsshock')
-    proc_inference_indic_1 = [1 8 10 6 4 9 5 7];
-    proc_inference_indic_2 = [1 1 2 6 4 4 5 7; 1 2 2 1 1 4 1 1];
+    proc_inference_indic_1 = [1 13 15 11 8 5 14 16 12 10];
+    proc_inference_indic_2 = [1 1 2 11 8 5 5 6 12 10; 1 2 2 1 1 1 4 4 1 1];
+    % VAR_AIC, VAR_{b,AIC}, VAR_{b,4}, VAR_{AIC,small}, BVAR, LP_AIC, LP_{b,AIC}, LP_{b,4}, LP_{AIC,small}, SLP
 elseif strcmp(estimand_type,'recursive')
-    proc_inference_indic_1 = [1 2 8 10 4 5 9 11];
-    proc_inference_indic_2 = [1 2 1 2 4 5 4 5; 1 1 2 2 1 1 4 4];
+    proc_inference_indic_1 = [1 2 13 15 8 5 6 14 16 10];
+    proc_inference_indic_2 = [1 2 1 2 8 5 6 5 6 10; 1 1 2 2 1 1 1 4 4 1];
+    % VAR_AIC, VAR_4, VAR_{b,AIC}, VAR_{b,4}, BVAR, LP_AIC, LP_4, LP_{b,AIC}, LP_{b,4}, SLP
 end
 
 proc_inference    = settings.est.names(proc_inference_indic_1);
@@ -252,7 +265,7 @@ elseif strcmp(estimand_type,'recursive')
 end
 xlabel('horizon','interpreter','latex');
 ylim([0 1]);
-title('coverage probability','interpreter','latex');
+title('coverage shortfall','interpreter','latex');
 grid on
 
 % median length
@@ -288,8 +301,6 @@ else
 end
 grid on;
 
-% size
-
 pos = get(gcf, 'Position');
 set(gcf, 'Position', [pos(1) pos(2) 2*pos(3) pos(4)]);
 set(gcf, 'PaperPositionMode', 'auto');
@@ -324,71 +335,3 @@ pos = get(gcf, 'Position');
 set(gcf, 'Position', [pos(1) pos(2) 1.4*pos(3) 1*pos(4)]);
 set(gcf, 'PaperPositionMode', 'auto');
 exportgraphics(gcf, fullfile(plot_folder, 'covgindic.eps'))
-
-%----------------------------------------------------------------
-% Degree of Mis-Specification
-%----------------------------------------------------------------
-
-% preparations
-
-M_draws = results.M;
-
-n_lags   = size(M_draws,2);
-n_kernel = 1001;
-
-% colors
-
-colors.purple  = [160/255 32/255 240/255];
-colors.lpurple = 0.5 * colors.purple + 0.5 * [1 1 1];
-colors.blue    = [116/255 158/255 178/255];
-colors.lblue   = 0.5 * colors.blue + 0.5 * [1 1 1];
-colors.orange  = [204/255 102/255 0/255];
-colors.lorange = 0.5 * colors.orange + 0.5 * [1 1 1];
-
-colors.base  = [colors.blue; colors.purple; colors.orange];
-colors.light = [colors.lblue; colors.lpurple; colors.lorange];
-
-% get Kernel densities
-
-M_lb = 0;
-M_ub = 1.2 * max(max(M_draws));
-
-M_density = NaN(2,n_kernel,n_lags);
-M_density(1,:,:) = repmat(linspace(M_lb,M_ub,n_kernel),1,1,n_lags);
-
-for i_lag = 1:n_lags
-
-    M_density(2,:,i_lag) = kernel(M_density(1,:,i_lag),M_draws(:,i_lag),0.4);
-    M_density(2,:,i_lag) = M_density(2,:,i_lag) * (M_density(1,2,i_lag) - M_density(1,1,i_lag));
-
-end
-
-% figure
-
-figure(length(the_objects)+3)
-
-pos = get(gca, 'Position');
-set(gca,'Position', pos)
-set(gca,'FontSize',17)
-set(gca,'TickLabelInterpreter','latex')
-hold on
-for i_lag = 1:n_lags
-    jbfill(M_density(1,:,i_lag),0*M_density(2,:,i_lag),M_density(2,:,i_lag),...
-        colors.light(i_lag,:),colors.light(i_lag,:),0,0.5);
-    hold on
-end
-for i_lag = 1:n_lags
-    plot(M_density(1,:,i_lag),M_density(2,:,i_lag),'linewidth',3,'linestyle','-','color',colors.base(i_lag,:));
-    hold on
-end
-set(gcf,'color','w')
-xlabel('Degree of Misspecification','interpreter','latex','FontSize',20)
-xlim([M_lb M_ub]);
-legend({'$p = 2$','$p = 4$','$p = 8$'},'Location','Northeast','fontsize',18,'interpreter','latex')
-grid on
-hold off
-
-pos = get(gcf, 'Position');
-set(gcf, 'Position', [pos(1) pos(2) 1.8*pos(3) 1.1*pos(4)]);
-set(gcf, 'PaperPositionMode', 'auto');
-exportgraphics(gcf, fullfile(plot_folder, 'misspec.eps'))

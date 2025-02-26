@@ -25,6 +25,7 @@ mode_type     = 3; % robustness check mode:
                    % 1 (baseline), 2 (persistent), 3 (salient series),
                    % 4 (more observables)
 sample_length = 'medium';  % short (T=100), medium (T=240), long (T=720)
+shock_type    = 'iid'; % 'iid' or 'arch'
 
 lags_list = [2 6 12];
 n_lags    = length(lags_list);
@@ -34,9 +35,39 @@ mkdir(plot_folder)
 
 %% SETTINGS
 
-% apply shared settings as well as settings specific to DGP and estimand type
+% shared
 
 shared;
+
+settings.est = rmfield(settings.est,'methods');
+
+% VAR
+
+[settings.est.methods{1}] = deal({'resp_ind' , [], ...
+    'innov_ind', [], ...
+    'bootstrap', [],...
+    'estimator', 'var', ...
+    'shrinkage', false});
+
+% LP 
+
+[settings.est.methods{2}] = deal({'resp_ind'  , [], ...
+    'innov_ind' , [], ...
+    'bootstrap', [],...
+    'estimator' , 'lp' , ...
+    'shrinkage' , false});  % LP
+
+% lags
+
+settings.est.n_lags_fix          = [4; 4];
+settings.est.system_type         = repmat({'big'}, 2, 1);
+
+settings.est.est_n_lag  = isnan(settings.est.n_lags_fix);  % indicator if lags are estimated
+settings.est.n_lags_max = 10;
+settings.est.n_methods  = length(settings.est.methods); % number of estimation methods
+
+% rest
+
 run(fullfile('_dfm/settings', dgp_type));
 run(fullfile('_dfm/settings', estimand_type));
 set_mode;
@@ -49,6 +80,8 @@ settings.simul.n_mc = 1;
 
 settings.simul.T      = 5e5;
 settings.simul.T_burn = 1e2;
+% settings.simul.T      = 200;
+% settings.simul.T_burn = 100;
 
 settings.est.n_methods = length(settings.est.methods);
 
@@ -62,6 +95,7 @@ settings.est.n_methods = length(settings.est.methods);
 
 DFM_estimate = DFM_est(DF_model.n_fac, DF_model.n_lags_fac, DF_model.n_lags_uar, ...
     DF_model.reorder, DF_model.levels, DF_model.coint_rank);
+set_shocks;
 
 % extract and store estimated DFM parameters
 

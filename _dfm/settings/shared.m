@@ -108,8 +108,6 @@ else
 end
 opts_bvar.ndraw = 500;  % Posterior draws
 
-
-
 %----------------------------------------------------------------
 % Add to methods
 %----------------------------------------------------------------
@@ -189,8 +187,6 @@ if strcmp(estimand_type, 'obsshock')
     settings.est.n_lags_fix  = [settings.est.n_lags_fix; NaN; NaN];
     settings.est.system_type = [settings.est.system_type; repmat({'small'}, 2, 1)];
 end
-
-
 
 settings.est.est_n_lag  = isnan(settings.est.n_lags_fix);  % indicator if lags are estimated
 settings.est.n_lags_max = 10;
