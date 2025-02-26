@@ -33,7 +33,7 @@ if strcmp(dgp_type_plot,'both')
     
 else
 
-    load(fullfile(load_folder, strcat('dfm_', dgp_type_plot, '_', estimand_type)))
+    load(fullfile(load_folder, strcat('dfm_', dgp_type_plot, '_', estimand_type, '_', sample_length, '_', shock_type)))
 
     results.target_irf     = DF_model.target_irf;
     results.mse            = 0.5 * results.bias2 + 0.5 * results.vce;
