@@ -43,23 +43,23 @@ set(gca,'Position', pos)
 set(gca,'FontSize',17)
 set(gca,'TickLabelInterpreter','latex')
 hold on
-plot(b_over_sigma,0.90*ones(length(b_over_sigma),1),'linewidth',4,'linestyle','-','color',colors.blue);
-hold on
 plot(b_over_sigma,coverage_90,'linewidth',4,'linestyle','-','color',colors.red);
 hold on
-plot(b_over_sigma,0.68*ones(length(b_over_sigma),1),'linewidth',4,'linestyle',':','color',colors.lblue);
+plot(0,0.9,'s','MarkerFaceColor','black','MarkerEdgeColor','black','MarkerSize',10)
 hold on
 plot(b_over_sigma,coverage_68,'linewidth',4,'linestyle',':','color',colors.lred);
 hold on
-plot(b_over_sigma,0.95*ones(length(b_over_sigma),1),'linewidth',4,'linestyle','-.','color',colors.dblue);
+plot(0,0.68,'s','MarkerFaceColor','black','MarkerEdgeColor','black','MarkerSize',10)
 hold on
 plot(b_over_sigma,coverage_95,'linewidth',4,'linestyle','-.','color',colors.dred);
+plot(0,0.95,'s','MarkerFaceColor','black','MarkerEdgeColor','black','MarkerSize',10)
+hold on
 hold off
 set(gcf,'color','w')
 xlabel('$|b_h(p)| / \tau_{h,VAR}(p)$','interpreter','latex','FontSize',20)
 ylabel('CI Coverage','interpreter','latex','FontSize',20)
 yticks([0:0.2:1])
-legend({'LPs','VARs'},'Location','Southwest','fontsize',20,'interpreter','latex')
+% legend({'LPs','VARs'},'Location','Southwest','fontsize',20,'interpreter','latex')
 grid on
 hold off
 
@@ -67,29 +67,3 @@ pos = get(gcf, 'Position');
 set(gcf, 'Position', [pos(1) pos(2) 1.2*pos(3) 1.2*pos(4)]);
 set(gcf, 'PaperPositionMode', 'auto');
 exportgraphics(gcf, fullfile(plot_folder, 'covg_distortion.eps'))
-
-figure(2)
-pos = get(gca, 'Position');
-set(gca,'Position', pos)
-set(gca,'FontSize',17)
-set(gca,'TickLabelInterpreter','latex')
-hold on
-plot(b_over_sigma,0.90*ones(length(b_over_sigma),1),'linewidth',4,'linestyle','-','color',colors.blue);
-hold on
-plot(b_over_sigma,0.68*ones(length(b_over_sigma),1),'linewidth',4,'linestyle',':','color',colors.lblue);
-hold on
-plot(b_over_sigma,0.95*ones(length(b_over_sigma),1),'linewidth',4,'linestyle','-.','color',colors.dblue);
-hold off
-set(gcf,'color','w')
-xlabel('$|b_h(p)| / \tau_{h,VAR}(p)$','interpreter','latex','FontSize',20)
-ylabel('CI Coverage','interpreter','latex','FontSize',20)
-yticks([0:0.2:1])
-ylim([0 1])
-legend({'LPs'},'Location','Southwest','fontsize',20,'interpreter','latex')
-grid on
-hold off
-
-pos = get(gcf, 'Position');
-set(gcf, 'Position', [pos(1) pos(2) 1.2*pos(3) 1.2*pos(4)]);
-set(gcf, 'PaperPositionMode', 'auto');
-exportgraphics(gcf, fullfile(plot_folder, 'covg_distortion_0.eps'))

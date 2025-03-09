@@ -159,6 +159,7 @@ ses       = estims;
 
 for i_lags = 1:n_lags
 
+    disp(i_lags)
     nlags = lags_list(i_lags);
         
     for i_method = 1:settings.est.n_methods
@@ -216,7 +217,7 @@ set(gca,'TickLabelInterpreter','latex')
 hold on
 plot(0:1:IRF_plot-1,scale*DF_model.target_irf(1:IRF_plot),'linewidth',4,'linestyle','-','color',colors.grey)
 hold on
-plot(0:1:IRF_plot-1,scale*estims(4,:,i_lags),'linewidth',4,'linestyle','-.','color',colors.blue)
+plot(0:1:IRF_plot-1,scale*estims(2,:,i_lags),'linewidth',4,'linestyle','-.','color',colors.blue)
 hold on
 plot(0:1:IRF_plot-1,scale*estims(1,:,i_lags),'linewidth',4,'linestyle',':','color',colors.red)
 hold on

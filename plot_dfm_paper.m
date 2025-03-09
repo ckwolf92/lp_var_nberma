@@ -22,7 +22,7 @@ cd([path]);
 % Set Experiment
 %----------------------------------------------------------------
 
-dgp_type_plot = 'both'; % structural shock: either 'g', or 'mp', or 'both'
+dgp_type_plot = 'mp'; % structural shock: either 'g', or 'mp', or 'both'
 estimand_type = 'obsshock'; % structural estimand: either 'obsshock' or 'recursive'
 mode_type     = 6; % robustness check mode:
                    % 1 (baseline), 2 (persistent), 3 (salient series),
@@ -89,7 +89,7 @@ clear covg_cutoff
 % procedure names
 
 settings.est.names = {'VAR$_{AIC}$', 'VAR$_{4}$', 'VAR$_{8}$', 'VAR$_{AIC, hom.}$', 'LP$_{AIC}$', 'LP$_{4}$',...
-              'LP$_{AIC, hom.}$', 'BVAR$_{4}$', 'SLP$_{4, base}$', 'SLP$_{4}$', 'VAR$_{AIC, small}$', 'LP$_{AIC, small}$', ...
+              'LP$_{AIC, hom.}$', 'BVAR$_{4}$', 'PenLP$_{4, base}$', 'PenLP$_{4}$', 'VAR$_{AIC, small}$', 'LP$_{AIC, small}$', ...
               'VAR$_{b, AIC}$', 'LP$_{b, AIC}$', 'VAR$_{b, 4}$', 'LP$_{b, 4}$'};
 
 %% GENERATE FIGURES
@@ -147,7 +147,7 @@ line_width = 5 * ones(length(line_specs),1);
 if strcmp(estimand_type,'obsshock')
     proc_estim_indic = [1 2 11 8 5 6 12 10];
 elseif strcmp(estimand_type,'recursive')
-    proc_estim_indic = [1 2 5 6];
+    proc_estim_indic = [1 2 8 5 6 10];
 end
 
 proc_estim    = settings.est.names(proc_estim_indic);
@@ -193,9 +193,9 @@ for j = 1:length(the_objects)
     if j == 1
     else
         if mode_type == 5
-            legend(proc_estim, 'Location', 'southeast', 'NumColumns', 2, 'interpreter', 'latex', 'FontSize', 20);
+            legend(proc_estim, 'Location', 'southeast', 'NumColumns', 2, 'interpreter', 'latex', 'FontSize', 18);
         else
-            legend(proc_estim, 'Location', 'southwest', 'NumColumns', 2, 'interpreter', 'latex', 'FontSize', 20);
+            legend(proc_estim, 'Location', 'southeast', 'NumColumns', 2, 'interpreter', 'latex', 'FontSize', 18);
         end
     end
     grid on
