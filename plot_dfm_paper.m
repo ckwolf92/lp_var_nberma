@@ -145,7 +145,7 @@ line_width = 5 * ones(length(line_specs),1);
 % preparations
 
 if strcmp(estimand_type,'obsshock')
-    proc_estim_indic = [1 2 11 5 6 12];
+    proc_estim_indic = [1 2 11 8 5 6 12 10];
 elseif strcmp(estimand_type,'recursive')
     proc_estim_indic = [1 2 5 6];
 end
@@ -193,9 +193,9 @@ for j = 1:length(the_objects)
     if j == 1
     else
         if mode_type == 5
-            legend(proc_estim, 'Location', 'southeast', 'NumColumns', 1, 'interpreter', 'latex', 'FontSize', 20);
+            legend(proc_estim, 'Location', 'southeast', 'NumColumns', 2, 'interpreter', 'latex', 'FontSize', 20);
         else
-            legend(proc_estim, 'Location', 'east', 'NumColumns', 1, 'interpreter', 'latex', 'FontSize', 20);
+            legend(proc_estim, 'Location', 'southwest', 'NumColumns', 2, 'interpreter', 'latex', 'FontSize', 20);
         end
     end
     grid on
