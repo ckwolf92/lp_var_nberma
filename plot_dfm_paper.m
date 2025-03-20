@@ -22,7 +22,7 @@ cd([path]);
 % Set Experiment
 %----------------------------------------------------------------
 
-dgp_type_plot = 'mp'; % structural shock: either 'g', or 'mp', or 'both'
+dgp_type_plot = 'both'; % structural shock: either 'g', or 'mp', or 'both'
 estimand_type = 'obsshock'; % structural estimand: either 'obsshock' or 'recursive'
 mode_type     = 6; % robustness check mode:
                    % 1 (baseline), 2 (persistent), 3 (salient series),
@@ -265,7 +265,7 @@ elseif strcmp(estimand_type,'recursive')
 end
 xlabel('horizon','interpreter','latex');
 ylim([0 1]);
-title('coverage shortfall','interpreter','latex');
+title('censored coverage','interpreter','latex');
 grid on
 
 % median length
