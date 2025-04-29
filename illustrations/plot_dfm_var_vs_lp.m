@@ -1,18 +1,18 @@
-%% EXTENDED DFM SIMULATION STUDY
-% Christian Wolf
+%% VAR VS. LP DFM ILLUSTRATION
+% Jose L. Montiel Olea, Mikkel Plagborg-Moller, Eric Qian, and Christian Wolf
 % this version: 10/24/2024
 
 %% HOUSEKEEPING
 
+clear
 clc
-clear all
 close all
 
 path = cd;
 
-addpath(genpath([path '/_auxiliary_functions']));
-addpath(genpath('_dfm'))
-addpath(genpath('_estim'))
+addpath(genpath('../_auxiliary_functions'));
+addpath(genpath('../_dfm'))
+addpath(genpath('../_estim'))
 
 rng(1, 'twister');
 
@@ -68,8 +68,8 @@ settings.est.n_methods  = length(settings.est.methods); % number of estimation m
 
 % rest
 
-run(fullfile('_dfm/settings', dgp_type));
-run(fullfile('_dfm/settings', estimand_type));
+run(fullfile('../_dfm/settings', dgp_type));
+run(fullfile('../_dfm/settings', estimand_type));
 set_mode;
 
 % adjust settings

@@ -1,18 +1,18 @@
 %% EXTENDED DFM SIMULATION STUDY
-% this version: 10/24/2024
-
+% Jose L. Montiel Olea, Mikkel Plagborg-Moller, Eric Qian, and Christian Wolf
+% this version: 04/29/2025
 %% HOUSEKEEPING
 
+clear
 clc
-clear all
 close all
 
 path = cd;
 
-addpath(genpath([path '/_auxiliary_functions']));
-addpath(genpath([path '/_estim']));
-addpath(genpath([path '/_dfm']));
-cd([path]);
+addpath(genpath('../_auxiliary_functions'));
+addpath(genpath('../_estim'));
+addpath(genpath('/_dfm'));
+
 
 rng(1, 'twister');
 
@@ -24,15 +24,15 @@ mode_type     = 3; % robustness check mode:
                    % 1 (baseline), 2 (persistent), 3 (salient series),
                    % 4 (more observables), 5 (salient + persistent series)
 sample_length = 'medium';  % short (T=100), medium (T=240), long (T=720)
-shock_type    = 'arch';  % either 'arch' or 'iid' 
+shock_type    = 'arch';    % either 'arch' or 'iid' 
 
 %% SETTINGS
 
 % apply shared settings as well as settings specific to DGP and estimand type
 
 shared;
-run(fullfile('_dfm/settings', dgp_type));
-run(fullfile('_dfm/settings', estimand_type));
+run(fullfile('../_dfm/settings', dgp_type));
+run(fullfile('../_dfm/settings', estimand_type));
 set_mode;
 
 % storage folder for results
@@ -54,13 +54,11 @@ set_shocks;
 
 % extract and store estimated DFM parameters
 
-DF_model.Phi           = DFM_estimate.Phi;
-DF_model.Sigma_eta     = DFM_estimate.Sigma_eta;
-
-DF_model.Lambda        = DFM_estimate.Lambda;
-DF_model.delta         = DFM_estimate.delta;
-DF_model.sigma_v       = DFM_estimate.sigma_v;
-
+DF_model.Phi       = DFM_estimate.Phi;
+DF_model.Sigma_eta = DFM_estimate.Sigma_eta;
+DF_model.Lambda    = DFM_estimate.Lambda;
+DF_model.delta     = DFM_estimate.delta;
+DF_model.sigma_v   = DFM_estimate.sigma_v;
 [DF_model.n_y,DF_model.n_fac] = size(DF_model.Lambda);
 
 %----------------------------------------------------------------
@@ -89,13 +87,15 @@ settings.specifications = pick_var_fn(DF_model, settings);
 
 % point estimates
 
-estims = zeros(settings.specifications.n_spec, settings.est.n_methods, settings.est.n_IRF, settings.simul.n_mc);
+estims = zeros(settings.specifications.n_spec, settings.est.n_methods, ...
+    settings.est.n_IRF, settings.simul.n_mc);
 
 % CIs
 
 ses    = estims;
 
-cis_lower = zeros(settings.specifications.n_spec, settings.est.n_methods, settings.est.n_IRF, 4, settings.simul.n_mc);
+cis_lower = zeros(settings.specifications.n_spec, settings.est.n_methods, ...
+    settings.est.n_IRF, 4, settings.simul.n_mc);
 cis_upper = cis_lower;
 
 % lags
@@ -228,7 +228,6 @@ results.cover_inds = (irs_true_reshape >= results.cis_lower ...
 
 results.coverage_prob = mean(results.cover_inds,5); % coverage probability
 
-results.coverage_prob = mean(results.coverage_prob,1);
 
 % median length
 

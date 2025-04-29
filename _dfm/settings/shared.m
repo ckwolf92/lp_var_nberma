@@ -15,7 +15,7 @@ DF_model.censor_arch_uar = 0.7;  % cutoff for right-censoring ARCH parameter whe
 % selection of DGPs from encompassing model
 
 settings.specifications.random_select         = 1; % randomly select variables from DFM list?
-settings.specifications.random_n_spec         = 100; % number of random specifications
+settings.specifications.random_n_spec         = 7; % number of random specifications (set to 100 for full results)
 settings.specifications.random_n_var          = 5; % number of variables in each random specification
 settings.specifications.random_category_range = [1 20; 21 31; 32 76; 77 86; 87 94; 95 131; 132 141;...
                                                  142 159; 160 171; 172 180; 181 207]; % ranges for Stock-Watson variable categories (see their Table 1)
@@ -48,7 +48,7 @@ settings.est.n_lag_large_ref = 4;
 
 % number of Monte Carlo draws
 
-settings.simul.n_mc    = 1000; % number of Monte Carlo reps
+settings.simul.n_mc    = 4; % number of Monte Carlo reps (set to 1000)
 settings.simul.seed    = (1:settings.simul.n_mc)*10 + randi([0,9],1,settings.simul.n_mc); % random seed for each Monte Carlo
 
 % time periods for each simulation
@@ -90,8 +90,8 @@ settings.misspec.zeta         = 0.5; % local-to-VAR coefficient
 
 opts_slp.lambdaRange   = [0.001:0.005:0.021, 0.05:0.1:1.05, ...
                           2:1:19, 20:20:100, 200:200:2000];  % CV grid, scaled by T
-opts_slp.CV_folds      = 5;                                  % # CV folds
-opts_slp.irfLimitOrder = 2;                                  % shrink towards polynomial of that order
+opts_slp.CV_folds      = 5;                                  % Number of CV folds
+opts_slp.irfLimitOrder = 2;                                  % Shrink towards polynomial of that order
 opts_slp.undersmooth   = false;                              % multiply optimal lambda by 0.1? 
 
 % (Under-)smoothed LP defaults
@@ -196,18 +196,16 @@ settings.est.n_methods  = length(settings.est.methods); % number of estimation m
 % Shared settings
 %----------------------------------------------------------------
 
-settings.est.alpha            = 0.1; % significance level. 1-alpha credible interval for BVAR.
-settings.est.no_const         = false; % true: omit intercept
-settings.est.boot_num         = 500;   % number of bootstrap samples
-settings.est.bias_corr_var    = true;  % Pope (1990) VAR bias correction
-settings.est.bias_corr_lp     = true;  % HJ (2024) LP bias correction
+settings.est.alpha      = 0.1;   % significance level. 1-alpha credible interval for BVAR.
+settings.est.no_const   = false; % true: omit intercept
+settings.est.boot_num   = 500;   % number of bootstrap samples
+settings.est.bias_corr  = true;  % Pope (1990) VAR bias correction or HJ (2024) LP bias correction.
 
 settings.est.methods_shared = {
-                               'alpha'        , settings.est.alpha,...
-                               'no_const'     , settings.est.no_const,...
-                               'boot_num'     , settings.est.boot_num,...
-                               'bias_corr_var', settings.est.bias_corr_var,...
-                               'bias_corr_lp' , settings.est.bias_corr_lp};
+                               'alpha'    , settings.est.alpha,...
+                               'no_const' , settings.est.no_const,...
+                               'boot_num' , settings.est.boot_num,...
+                               'bias_corr', settings.est.bias_corr};
 
 
 %% PARALLELIZATION

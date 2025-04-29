@@ -1,6 +1,6 @@
 %% COVERAGE COST OF BIAS
 % Jose L. Montiel Olea, Mikkel Plagborg-Moller, Eric Qian, and Christian Wolf
-% this version: 01/16/2025
+% this version: 04/29/2025
 
 %% HOUSEKEEPING
 
@@ -10,7 +10,7 @@ close all
 
 path = cd;
 
-cd([path]);
+cd(path);
 
 %% COMPUTE COVERAGE DISTORTION
 

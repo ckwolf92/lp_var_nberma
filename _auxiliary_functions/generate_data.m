@@ -20,16 +20,13 @@ D = model.ABCD.D;
 
 shock_weight = settings.est.shock_weight;
 
-if strcmp(model.shock_type, 'arch')
-    arch_all = [model.arch_fac;model.arch_uar];
-end
-
 % draw shocks
 
 if strcmp(model.shock_type, 'iid')
     data_e = randn(T_burn+T,n_e);
 elseif strcmp(model.shock_type, 'arch')
-    data_e = NaN(T_burn+T,n_e);
+    arch_all = [model.arch_fac;model.arch_uar];
+    data_e   = NaN(T_burn+T,n_e);
     for i_e = 1:n_e
         arch_mdl = garch(Constant=1-arch_all(i_e),GARCH=0,ARCH=arch_all(i_e));
         [~,data_e(:,i_e)] = simulate(arch_mdl,T_burn+T);

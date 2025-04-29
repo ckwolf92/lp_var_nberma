@@ -1,20 +1,21 @@
 %% EXTENDED DFM SIMULATION STUDY: GENERATE FIGURES
-% this version: 01/12/2025
+% Jose L. Montiel Olea, Mikkel Plagborg-Moller, Eric Qian, and Christian Wolf
+% this version: 04/29/2025
 
 %% HOUSEKEEPING
 
+clear
 clc
-clear all
 close all
 
-path = '/Users/christianwolf/Documents/GitHub/lp_var_nberma';
-path_results = '/Users/christianwolf/Dropbox/Research/lp_var_nberma/codes';
+path         = cd;
+path_results = fullfile(path, '_results');
 
-addpath(genpath([path '/_auxiliary_functions']));
-addpath(genpath([path '/_estim']));
-addpath(genpath([path '/_dfm']));
+addpath(genpath('../_auxiliary_functions'));
+addpath(genpath('../_estim'));
+addpath(genpath('../_dfm'));
 addpath(genpath(path_results))
-cd([path]);
+cd(path);
 
 %% LOAD RESULTS
 
@@ -22,9 +23,9 @@ cd([path]);
 % Set Experiment
 %----------------------------------------------------------------
 
-dgp_type_plot = 'both'; % structural shock: either 'g', or 'mp', or 'both'
+dgp_type_plot = 'mp'; % structural shock: either 'g', or 'mp', or 'both'
 estimand_type = 'obsshock'; % structural estimand: either 'obsshock' or 'recursive'
-mode_type     = 6; % robustness check mode:
+mode_type     = 3; % robustness check mode:
                    % 1 (baseline), 2 (persistent), 3 (salient series),
                    % 4 (more observables), 5 (salient + persistent series),
                    % 6 (combine 3 & 5)
@@ -36,7 +37,7 @@ shock_type    = 'arch'; % 'iid' or 'arch'
 %----------------------------------------------------------------
 
 mode_list   = {'baseline', 'persistent', 'salient', 'more', 'persistent_salient', 'salient_all'};
-load_pre    = '_results_small_2025_0225';
+load_pre    = '';
 covg_cutoff = 0.8; % cut-off for coverage indicator plots
 
 if mode_type <= 5
@@ -173,8 +174,10 @@ for j = 1:length(the_objects)
     set(gca,'Position', pos)
     hold on
     for i_proc = 1:numproc_estim
-        plot(horzs, the_result(:,proc_estim_indic(i_proc)), line_specs{proc_estim_indic(i_proc)}, ...
-            'Color', line_colors(proc_estim_indic(i_proc),:), 'LineWidth', line_width(proc_estim_indic(i_proc)));
+        plot(horzs, the_result(:,proc_estim_indic(i_proc)), ...
+            line_specs{proc_estim_indic(i_proc)}, ...
+            'Color', line_colors(proc_estim_indic(i_proc),:), ...
+            'LineWidth', line_width(proc_estim_indic(i_proc)));
         hold on
     end
     if mode_type == 5
@@ -190,13 +193,9 @@ for j = 1:length(the_objects)
         xlim([min(horzs)+1 max(horzs)])
     end
     xlabel('horizon','interpreter','latex');
-    if j == 1
-    else
-        if mode_type == 5
-            legend(proc_estim, 'Location', 'southeast', 'NumColumns', 2, 'interpreter', 'latex', 'FontSize', 18);
-        else
-            legend(proc_estim, 'Location', 'southeast', 'NumColumns', 2, 'interpreter', 'latex', 'FontSize', 18);
-        end
+    if j ~= 1
+        legend(proc_estim, 'Location', 'southeast', ...
+            'NumColumns', 2, 'interpreter', 'latex', 'FontSize', 18);
     end
     grid on
 
@@ -252,7 +251,8 @@ set(gca,'Position', pos)
 hold on
 for i_proc = 1:numproc_inference
     plot(horzs, squeeze(results.coverage_avg(1,proc_inference_indic_2(1,i_proc),:,proc_inference_indic_2(2,i_proc))), ...
-        line_specs{proc_inference_indic_1(i_proc)}, 'Color', line_colors(proc_inference_indic_1(i_proc),:),...
+        line_specs{proc_inference_indic_1(i_proc)}, ...
+        'Color', line_colors(proc_inference_indic_1(i_proc),:),...
         'LineWidth',line_width(proc_inference_indic_1(i_proc)));
     hold on
 end
@@ -280,7 +280,8 @@ set(gca,'Position', pos)
 hold on
 for i_proc = 1:numproc_inference
     plot(horzs, squeeze(log10(results.median_avg(1,proc_inference_indic_2(1,i_proc),:,proc_inference_indic_2(2,i_proc)))), ...
-        line_specs{proc_inference_indic_1(i_proc)}, 'Color', line_colors(proc_inference_indic_1(i_proc),:),...
+        line_specs{proc_inference_indic_1(i_proc)}, ...
+        'Color', line_colors(proc_inference_indic_1(i_proc),:),...
         'LineWidth',line_width(proc_inference_indic_1(i_proc)));
     hold on
 end
@@ -317,7 +318,8 @@ set(gca,'Position', pos)
 hold on
 for i_proc = 1:numproc_inference
     plot(horzs, squeeze(results.coverage_indic(1,proc_inference_indic_2(1,i_proc),:,proc_inference_indic_2(2,i_proc))), ...
-        line_specs{proc_inference_indic_1(i_proc)}, 'Color', line_colors(proc_inference_indic_1(i_proc),:),...
+        line_specs{proc_inference_indic_1(i_proc)}, ...
+        'Color', line_colors(proc_inference_indic_1(i_proc),:),...
         'LineWidth',line_width(proc_inference_indic_1(i_proc)));
     hold on
 end

@@ -1,14 +1,17 @@
 %% ILLUSTRATIVE ARMA
-clc
+% Jose L. Montiel Olea, Mikkel Plagborg-Moller, Eric Qian, and Christian Wolf
+% this version: 04/29/2025
 clear
+clc
 close all
 
-path = cd;
+path        = cd;
 plot_folder = '_figures/arma';
 mkdir(plot_folder)
 
-addpath(genpath([path '/_auxiliary_functions']));
-addpath(genpath([path '/_estim']));
+addpath(genpath('../_auxiliary_functions'));
+addpath(genpath('../_estim'))
+
 
 %% SETTINGS
 
@@ -43,8 +46,8 @@ settings.est.methods_shared = {'alpha', 0.1,...
     'bootstrap', [],...
     'resp_ind',  1,...
     'innov_ind', 1,...
-    'bias_corr_var', false, ...
-    'bias_corr_lp', false};
+    'bias_corr', false,...
+    'shrinkage', false};
 [settings.est.methods{1:3}] = deal({'estimator', 'var'});
 [settings.est.methods{4:6}] = deal({'estimator', 'lp'});
 settings.est.n_lags_fix     = [1; 4; 8; 1; 4; 8];
@@ -60,10 +63,10 @@ dgps   = [aux1;reshape(aux2,[1,size(aux1,2)])];
 
 settings.est.n_methods = length(settings.est.methods);
 
-n_dgp     = size(dgps,2);                     % No. of DGPs
-n_horz    = length(settings.est.horzs);       % No. of horizons
-n_methods = settings.est.n_methods;           % No. of regression specifications
-n_rep     = sim.n_rep;                        % No. of repetitions
+n_dgp     = size(dgps,2);                % No. of DGPs
+n_horz    = length(settings.est.horzs);  % No. of horizons
+n_methods = settings.est.n_methods;      % No. of regression specifications
+n_rep     = sim.n_rep;                   % No. of repetitions
 
 irs_true = nan(n_dgp, n_horz);
 
@@ -260,7 +263,7 @@ for i = 1:n_spec
     title('Std. Dev.', 'Interpreter','latex')
 end
 
-lgd = legend(lgd_lab, 'Interpreter','latex', 'Location','northeast', ...
+lgd = legend(lgd_lab, 'Interpreter', 'latex', 'Location', 'northeast', ...
     'NumColumns', 3, 'Position',  [0.1272    0.0677    0.7482    0.1056]);
 set(gca, 'FontSize', fs);
 end

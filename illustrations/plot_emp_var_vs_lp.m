@@ -1,6 +1,6 @@
 %% LP-VAR EMPIRICAL COMPARISON
 % Jose L. Montiel Olea, Mikkel Plagborg-Moller, Eric Qian, and Christian Wolf
-% this version: 01/03/2025
+% this version: 04/29/2025
 
 %% HOUSEKEEPING
 
@@ -10,10 +10,10 @@ close all
 
 path = cd;
 
-addpath(genpath([path '/_auxiliary_functions']));
-addpath(genpath([path '/_results']));
+addpath(genpath([path '../_auxiliary_functions']));
+addpath(genpath([path '../_results']));
 
-cd([path]);
+cd(path);
 
 %% IMPORT RESULTS
 
