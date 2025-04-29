@@ -9,7 +9,6 @@ clc
 close all
 
 path = cd;
-
 cd(path);
 
 %% COMPUTE COVERAGE DISTORTION

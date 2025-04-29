@@ -10,6 +10,8 @@ Tested in: MATLAB R024a on MacBook Pro 2023 (M3 Pro)
 
 ## Detailed replication instructions
 
+XX Set `settings.simul.n_mc` to `1000` and `settings.specifications.random_n_spec` to `100`.
+
 ## Acknowledgements
 The simulation study extends that of [Li, Plagborg-Møller, and Wolf (2024)](https://github.com/dake-li/lp_var_simul) with estimation routines based on the replication materials for [Montiel Olea, Plagborg-Møller, Qian, and Wolf (2024)](https://github.com/ckwolf92/lp_var_inference).
 

@@ -1,6 +1,7 @@
 %% EXTENDED DFM SIMULATION STUDY
 % Jose L. Montiel Olea, Mikkel Plagborg-Moller, Eric Qian, and Christian Wolf
 % this version: 04/29/2025
+
 %% HOUSEKEEPING
 
 clear
@@ -12,7 +13,7 @@ path = cd;
 addpath(genpath('../_auxiliary_functions'));
 addpath(genpath('../_estim'));
 addpath(genpath('/_dfm'));
-
+cd(path);
 
 rng(1, 'twister');
 

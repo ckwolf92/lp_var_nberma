@@ -1,4 +1,4 @@
-%% ILLUSTRATIVE ARMA
+%% ARMA ILLUSTRATION
 % Jose L. Montiel Olea, Mikkel Plagborg-Moller, Eric Qian, and Christian Wolf
 % this version: 04/29/2025
 clear
