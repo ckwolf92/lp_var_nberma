@@ -8,6 +8,41 @@ Tested in: MATLAB R024a on MacBook Pro 2023 (M3 Pro)
 
 ## Contents
 
+## Estimating IRFs using local projections
+
+Using our code suite, our recommended procedure is implemented below.
+
+Use the AIC to select the lag length `p` through estimating auxiliary VARs of lag length 1 through `p_max`.
+```m
+p_max  = 20;   % Maximum lag length
+method = 1;    % AIC
+p      = ic_var(data_y, p_max, method);
+```
+
+Below returns the local projection impulse response function `irs` of the second variable to the first innovation.
+```m
+horzs        = 0:20;  % Horizons of interest
+block_length = ceil(5.03*size(data_y, 1)^(1/4));  % Jentsch and Lunsford (2019) rule of thumb
+
+[irs, ses, cis, cis_boot] = ir_estim(data_y, p, horzs, ...
+    'resp_ind',  2,... 
+    'innov_ind', 1,...
+    'estimator', 'lp',...
+    'shrinkage', false,...
+    'bias_corr', true,...   % Herbst and Johannsen (2024) bias correction
+    'alpha',      0.05,...  % Significance level
+    'se_homosk', false,...  % Eicher-Huber-White standard errors
+    'bootstrap', 'var',...  % Residual bootstrap
+    'boot_num', 1000,...    % Number of bootstrap draws
+    'boot_blocklength', block_length) % Bootstrap block length 
+```
+We recommend using the procedure of [Herbst and Johannsen (2024)](https://www.sciencedirect.com/science/article/abs/pii/S0304407624000010) to bias-correct the LP estimator with heteroskedasticity-robust standard errors. Delta method standard errors and confidence intervals are stored in ``ses`` and ``cis`` respectively.
+
+We find further gains in finite-sample performance with the residual block bootstrap of [Brüggemann,
+Jentsch, and Trenkler (2016)](https://www.sciencedirect.com/science/article/abs/pii/S0304407615002547) with percentile-t bootstrap confidence intervals (stored in `cis_boot(:,:,3)`). We implement using the block length determined by [Jentsch and Lunsford (2019)](https://www.aeaweb.org/articles?id=10.1257/aer.20162011).
+
+
+
 ## Detailed replication instructions
 
 XX Set `settings.simul.n_mc` to `1000` and `settings.specifications.random_n_spec` to `100`.
