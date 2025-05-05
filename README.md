@@ -34,7 +34,7 @@ block_length = ceil(5.03*size(data_y, 1)^(1/4));  % Jentsch and Lunsford (2019) 
     'se_homosk', false,...  % Eicher-Huber-White standard errors
     'bootstrap', 'var',...  % Residual bootstrap
     'boot_num', 1000,...    % Number of bootstrap draws
-    'boot_blocklength', block_length) % Bootstrap block length 
+    'boot_blocklength', block_length);  % Bootstrap block length 
 ```
 We recommend using the procedure of [Herbst and Johannsen (2024)](https://www.sciencedirect.com/science/article/abs/pii/S0304407624000010) to bias-correct the LP estimator with heteroskedasticity-robust standard errors. Delta method standard errors and confidence intervals are stored in ``ses`` and ``cis`` respectively.
 
