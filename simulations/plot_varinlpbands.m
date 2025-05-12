@@ -1,4 +1,4 @@
-%% VAR ESTIMATE IN LP CI: GENERATE FIGURES
+%% VAR ESTIMATE IN LP CI: GENERATE FIGURE
 % Jose L. Montiel Olea, Mikkel Plagborg-Moller, Eric Qian, and Christian Wolf
 % this version: 05/12/2025
 
@@ -7,11 +7,13 @@ clear
 clc
 close all
 
-estimand_type = 'obsshock';
+estimand_type = 'obsshock';  % 'obsshock' or 'recursive'
 dgp_type      = {'g', 'mp'};
 mode_type     = {'salient', 'persistent_salient'};
-sample_length = 'medium'; % short (T=100), medium (T=240), long (T=720)
-shock_type    = 'arch';   % 'iid' or 'arch'
+sample_length = 'medium';  % 'short' (T=100), 'medium' (T=240), 'long' (T=720)
+shock_type    = 'arch';    % 'iid' or 'arch'
+
+plot_pre    = '_figures';
 
 %% LOAD AND COMBINE RESULTS
 
@@ -43,12 +45,11 @@ disp(1-mean(VARinLP_inds(:)))
 
 horzs = Res.settings.est.IRF_select - 1;
 
-figure('Units','inches','Position', [2 2 6 3])
+figure('Units', 'inches', 'Position', [2 2 6 3])
 plot(horzs, mean(mean(mean(VARinLP_inds, 1), 3),4), 'LineWidth', 5)
 ylim([0, 1])
 grid on;
-xlabel('horizon', 'Interpreter','latex')
-set(gca,'TickLabelInterpreter','latex', 'FontSize', 12)
+xlabel('horizon', 'Interpreter', 'latex')
+set(gca, 'TickLabelInterpreter', 'latex', 'FontSize', 12)
 xticks(0:2:20)
-mean(1-VARinLP_inds(:))
-exportgraphics(gcf, 'var_in_lpci.eps')
+exportgraphics(gcf, fullfile(plot_pre, 'var_in_lpci.eps'))
