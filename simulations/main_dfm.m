@@ -247,6 +247,12 @@ clear irs_true_reshape
 
 results.vce = var(results.estims,1,4);
 
+% AIC VAR point estimate in AIC LP (percentile-t bootstrap) interval
+
+results.VARinLP_inds = squeeze(results.estims(:,1,:,:)) >= squeeze(results.cis_lower(:,5,:,4,:)) &...
+                       squeeze(results.estims(:,1,:,:)) <= squeeze(results.cis_upper(:,5,:,4,:));
+results.VARinLP_prob = mean(results.VARinLP_inds, 3);
+
 %----------------------------------------------------------------
 % Save Results
 %----------------------------------------------------------------
