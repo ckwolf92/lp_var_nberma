@@ -1,4 +1,8 @@
-%% PRELIMINARIES
+%% VAR ESTIMATE IN LP CI: GENERATE FIGURES
+% Jose L. Montiel Olea, Mikkel Plagborg-Moller, Eric Qian, and Christian Wolf
+% this version: 05/12/2025
+
+%% HOUSEKEEPING
 clear
 clc
 close all
@@ -6,29 +10,28 @@ close all
 estimand_type = 'obsshock';
 dgp_type      = {'g', 'mp'};
 mode_type     = {'salient', 'persistent_salient'};
+sample_length = 'medium'; % short (T=100), medium (T=240), long (T=720)
+shock_type    = 'arch';   % 'iid' or 'arch'
 
 %% LOAD AND COMBINE RESULTS
-% Add both objects to the code in the dev branch.
-% Keep the VARinLP_inds in the big file.
-% Add VARinLP that averages over the 1000 simulations.
-% Keep only VARinLP in the small file.
-
 
 ind = 1;
 for j_mode = 1:length(mode_type)
     for j_dgp = 1:length(dgp_type)
         
-        Res = load([fullfile('_results_combined', mode_type{j_mode}, ...
-            ['dfm_' dgp_type{j_dgp} '_' estimand_type '_medium_arch.mat'])]);
-        VARinLP_inds_ij = squeeze(Res.results.estims(:,1,:,:)) >= squeeze(Res.results.cis_lower(:,5,:,4,:)) &...
-                          squeeze(Res.results.estims(:,1,:,:)) <= squeeze(Res.results.cis_upper(:,5,:,4,:));
+        % Load results
+        Res = load([fullfile('_results', mode_type{j_mode}, ...
+            ['dfm_' dgp_type{j_dgp} '_' estimand_type '_' sample_length...
+            '_' shock_type '.mat'])]);
+        VARinLP_probs_j = Res.results.VARinLP_prob;
 
+        % Store
         if ind == 1
-            VARinLP_inds = nan(size(VARinLP_inds_ij, 1), size(VARinLP_inds_ij, 2), ...
-                               size(VARinLP_inds_ij, 3),length(mode_type)*length(dgp_type));
+            VARinLP_inds = nan(size(VARinLP_probs_j, 1), size(VARinLP_probs_j, 2), ...
+                               length(mode_type)*length(dgp_type));
         end
         
-        VARinLP_inds(:,:,:,ind) = VARinLP_inds_ij;
+        VARinLP_inds(:,:,ind) = VARinLP_probs_j;
         ind                     = ind+1;
     end
 end
