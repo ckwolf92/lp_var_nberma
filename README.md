@@ -8,7 +8,7 @@ Tested in: MATLAB R024a on MacBook Pro 2023 (M3 Pro)
 
 ## Contents
 
-**[documents/](documents/)**: Paper and supplement
+**[documents/](documents/)**: Paper and supplement XX to add XX
 - Main paper
 - Supplement
 
@@ -34,13 +34,14 @@ Tested in: MATLAB R024a on MacBook Pro 2023 (M3 Pro)
 
 **[simulations/](simulations)**: Running and generating figures for the simulation study 
 - [main_dfm.m](simulations/main_dfm.m): Main file for the simulation study
-- [plot_dfm_paper.m](simulations/plot_dfm_paper.m): Plots of bias, standard deviation, MSE, and confidence interval coverage across estimators and DGPs (Figures 5.1 and 6.2 in the main text. Figures F.1-F.8 in the supplement).
+- [plot_dfm_paper.m](simulations/plot_dfm_paper.m): Plots of bias, standard deviation, MSE, and confidence interval coverage across estimators and DGPs (Figures 5.1, 5.2, and 6.2 in the main text. Figures D.1-D.7 in the supplement).
+- [plot_varinlpbands.m](simulations/plot_varinlpbands.m): Plot of fraction of DGPs for which the VAR point estimates are contained inside the LP confidence interval (Figure E.1 of the supplement).
 
 ## Estimating IRFs using local projections
 
 Using our code suite, our recommended procedure is implemented below.
 
-Use the AIC to select the lag length `p` through estimating auxiliary VARs of lag length 1 through `p_max`.
+Use the AIC to select the lag length `p` by estimating auxiliary VARs of lag length 1 through `p_max`.
 ```m
 p_max  = 20;   % Maximum lag length
 method = 1;    % AIC
@@ -90,13 +91,13 @@ We recommend reporting percentile-t bootstrap confidence intervals `cis_boot(:,:
         - To produce the appendix results for recursive identification, run the same combinations for `estimand_type='recursive'`.
     - Results will be saved in the directory `simulations/_results/`.
      
-2. **Generate figures**: Run the file `simulations/plot_dfm_paper.m` with the following figure-specific header modifications:
-    - *Figures 5.1, 6.2, and F.8*: Set `dgp_type_plot='both'`, `estimand_type='obsshock'`, and `mode_type=6`.
-    - *Figure F1 (left panel)*: Set `dgp_type_plot='both'`, `estimand_type='obsshock'`, and `mode_type=3`.
-    - *Figure F1 (right panel)*: Set `dgp_type_plot='both'`, `estimand_type='obsshock'`, and `mode_type=5`.    
-    - *Figures F.2 and F.3*: Set `dgp_type_plot='both'`, `estimand_type='recursive'`, and `mode_type=6`.
-    - *Figures F.4 and F.5*: Set `dgp_type_plot='g'`, `estimand_type='obsshock'`, and `mode_type=6`.
-    - *Figures F.6 and F.7*: Set `dgp_type_plot='mp'`, `estimand_type='obsshock'`, and `mode_type=6`.
+2. **Generate figures**: The following steps generate the figures included in the main text and supplement.
+    - Run the file [plot_dfm_paper.m](simulations/plot_dfm_paper.m) with the following figure-specific header modifications:
+        - *Figures 5.1, 5.2, 6.2, and D.7*: Set `dgp_type_plot='both'`, `estimand_type='obsshock'`, and `mode_type=6`.
+        - *Figures D.1 and D.2*: Set `dgp_type_plot='both'`, `estimand_type='recursive'`, and `mode_type=6`.
+        - *Figures D.3 and D.4*: Set `dgp_type_plot='g'`, `estimand_type='obsshock'`, and `mode_type=6`.
+        - *Figures D.5 and D.6*: Set `dgp_type_plot='mp'`, `estimand_type='obsshock'`, and `mode_type=6`.
+    - *Figure E.1*: Run the file [plot_varinlpbands.m](simulations/plot_varinlpbands.m).
 ## Acknowledgements
 The simulation study extends that of [Li, Plagborg-Møller, and Wolf (2024)](https://github.com/dake-li/lp_var_simul) with estimation routines based on the replication materials for [Montiel Olea, Plagborg-Møller, Qian, and Wolf (2024)](https://github.com/ckwolf92/lp_var_inference).
 
