@@ -70,7 +70,7 @@ opts_lp_boot = {'bootstrap', 'var',...  % Residual bootstrap
                 'boot_blocklength', block_length};
 [~, ~, ~, cis_boot] = ir_estim(data_y, p, horzs, opts_lp{:}, opts_lp_boot{:}); 
 ```
-We recommend reporting percentile-t bootstrap confidence intervals `cis_boot(:,:,3)`.
+We recommend reporting percentile-t bootstrap confidence intervals, i.e., `cis_boot(:,:,3)`.
 
 
 
