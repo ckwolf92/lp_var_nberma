@@ -55,7 +55,7 @@ opts_lp = {'resp_ind',  2, 'innov_ind', 1, 'estimator', 'lp',...
     'shrinkage', false,...
     'bias_corr', true,...  % Herbst and Johannsen (2024) bias correction
     'alpha',     0.05,...  % Significance level
-    'se_homosk', false};   % Eicher-Huber-White standard errors};
+    'se_homosk', false};   % Eicker-Huber-White standard errors};
 
 [irs, ses, cis] = ir_estim(data_y, p, horzs, opts_lp{:});  
 ```
