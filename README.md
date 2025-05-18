@@ -34,7 +34,7 @@ Tested in: MATLAB R024a on MacBook Pro 2023 (M3 Pro)
 
 **[simulations/](simulations)**: Running and generating figures for the simulation study 
 - [main_dfm.m](simulations/main_dfm.m): Main file for the simulation study
-- [plot_dfm_paper.m](simulations/plot_dfm_paper.m): Plots of bias, standard deviation, MSE, and confidence interval coverage across estimators and DGPs (Figures 5.1, 5.2, and 6.2 in the main text. Figures D.1-D.7 in the supplement).
+- [plot_dfm_paper.m](simulations/plot_dfm_paper.m): Plots of bias, standard deviation, MSE, and confidence interval coverage across estimators and DGPs (Figures 5.1, 5.2, and 6.2 in the main text, Figures D.1-D.7 in the supplement).
 - [plot_varinlpbands.m](simulations/plot_varinlpbands.m): Plot of fraction of DGPs for which the VAR point estimates are contained inside the LP confidence interval (Figure E.1 of the supplement).
 
 ## Estimating IRFs using local projections
