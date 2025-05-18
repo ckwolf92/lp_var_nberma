@@ -39,7 +39,7 @@ Tested in: MATLAB R024a on MacBook Pro 2023 (M3 Pro)
 
 ## Estimating IRFs using local projections
 
-Using our code suite, our recommended procedure is implemented below.
+Using our code suite, our recommended procedure for estimating LPs is implemented below.
 
 Use the AIC to select the lag length `p` by estimating auxiliary VARs of lag length 1 through `p_max`.
 ```m
