@@ -1,6 +1,6 @@
 function [irs, ses, cis, cis_boot, ses_bootstrap] = ir_estim(Y, p, horzs, varargin)
 
-% Wrapper function for (Bayesian) VAR, (smoothed) LP estimation of impulse responses
+% Wrapper function for VAR and LP estimation of impulse responses
 
 % Inputs: see the below "PARSE INPUTS" code section
 
