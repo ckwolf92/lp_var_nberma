@@ -232,8 +232,10 @@ gapsize = 0.1;
 gapsize_edges = (1-2*plotwidth-gapsize)/2;
 left_pos = [gapsize_edges, gapsize_edges + gapsize + plotwidth];
 
-yticks_length = -3:1:1; % y-ticks for median length plot (log10 scale)
-yticklabels_length = {'0.001', '0.01', '0.1', '1', '10'}; % y-tick labels for median length plot
+
+yticks_length = -1:1:1; % y-ticks for median length plot (log10 scale)
+yticklabels_length = {'0.1', '1', '10'}; % y-tick labels for median length plot
+
 
 % average coverage and width
 
@@ -268,7 +270,9 @@ ylim([0 1]);
 title('censored coverage','interpreter','latex');
 grid on
 
-% median length
+% median length normalized by RMS over horizons
+median_avg_norm = mean(results.median_length ./ the_rms_irf'); 
+
 
 subplot(1,2,2)
 pos = get(gca, 'Position');
@@ -279,7 +283,7 @@ pos(3) = plotwidth;
 set(gca,'Position', pos)
 hold on
 for i_proc = 1:numproc_inference
-    plot(horzs, squeeze(log10(results.median_avg(1,proc_inference_indic_2(1,i_proc),:,proc_inference_indic_2(2,i_proc)))), ...
+    plot(horzs, squeeze(log10(median_avg_norm(1,proc_inference_indic_2(1,i_proc),:,proc_inference_indic_2(2,i_proc)))), ...
         line_specs{proc_inference_indic_1(i_proc)}, ...
         'Color', line_colors(proc_inference_indic_1(i_proc),:),...
         'LineWidth',line_width(proc_inference_indic_1(i_proc)));
