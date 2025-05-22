@@ -10,6 +10,7 @@ settings.est.recursive_shock = 1; % use recursive shock
 settings.est.recursive_shock_pos = settings.specifications.random_fixed_pos; % which is recursively defined shock?
 
 % save variable indices
-
-settings.est.methods_shared(2) = {settings.est.IRF_response_var_pos};
-settings.est.methods_shared(4) = {settings.est.recursive_shock_pos};
+for i_method = 1:settings.est.n_methods
+    settings.est.methods{i_method}(2) = {settings.est.IRF_response_var_pos};
+    settings.est.methods{i_method}(4) = {settings.est.recursive_shock_pos};
+end

@@ -8,12 +8,14 @@ DF_model.coint_rank = 2; % cointegration rank in factor process (for levels spec
 DF_model.n_lags_fac = 2; % lag order of factors
 DF_model.n_lags_uar = 2; % lag order of measurement error
 
+DF_model.censor_arch_uar = 0.7;  % cutoff for right-censoring ARCH parameter when shock_type='arch'
+
 %% PREPARATIONS FOR STRUCTURAL ESTIMANDS
 
 % selection of DGPs from encompassing model
 
 settings.specifications.random_select         = 1; % randomly select variables from DFM list?
-settings.specifications.random_n_spec         = 50; % number of random specifications
+settings.specifications.random_n_spec         = 7; % number of random specifications (set to 100 for full results)
 settings.specifications.random_n_var          = 5; % number of variables in each random specification
 settings.specifications.random_category_range = [1 20; 21 31; 32 76; 77 86; 87 94; 95 131; 132 141;...
                                                  142 159; 160 171; 172 180; 181 207]; % ranges for Stock-Watson variable categories (see their Table 1)
@@ -46,41 +48,165 @@ settings.est.n_lag_large_ref = 4;
 
 % number of Monte Carlo draws
 
-settings.simul.n_mc    = 1e3; % number of Monte Carlo reps
+settings.simul.n_mc    = 4; % number of Monte Carlo reps (set to 1000)
 settings.simul.seed    = (1:settings.simul.n_mc)*10 + randi([0,9],1,settings.simul.n_mc); % random seed for each Monte Carlo
 
-% sample settings
-
-settings.simul.T      = 240; % time periods for each simulation
+% time periods for each simulation
+switch sample_length
+    case 'short'
+        settings.simul.T = 100; 
+    case 'medium'
+        settings.simul.T = 240; 
+    case 'long'
+        settings.simul.T = 720; 
+end
 settings.simul.T_burn = 100; % burn-in
+
+% degree of misspecification
+
+settings.misspec.indic        = 1; % indicator for computing the degree of mis-specification
+settings.misspec.lags         = [2 4 8]; % lags for mis-specification analysis
+settings.misspec.n_lags       = length(settings.misspec.lags);
+settings.misspec.VAR_infinity = 100; % VAR lag length
+settings.misspec.VMA_hor      = 200; % maximal VMA horizon
+settings.misspec.zeta         = 0.5; % local-to-VAR coefficient
 
 %% ESTIMATION SETTINGS
 
-% estimation methods
+% current list, for recursive:
+% VAR AIC, VAR 4, VAR 8, VAR AIC (homoscedastic), LP AIC, LP 4,
+% LP AIC (homoscedastic), BVAR, default SLP, under-smoothed SLP
 
-settings.est.methods{1} = {'estimator', 'var',...
-            'bias_corr', false};
+% current list, for observed shock:
+% VAR AIC, VAR 4, VAR 8, VAR AIC (homoscedastic), LP AIC, LP 4, 
+% LP AIC (homoscedastic), BVAR, default SLP, under-smoothed SLP
+% VAR AIC small, LP AIC small
 
-settings.est.methods{2} = {'estimator', 'lp',...
-            'bias_corr', false};
+% -------------------------------------------------------------------------
+% Smoothed LP and BVAR settings
+% -------------------------------------------------------------------------
 
-settings.est.no_const  = true; % true: omit intercept
-settings.est.se_homosk = true; % true: homoskedastic ses
-settings.est.alpha     = 0.1; % significance level
-settings.est.boot_num  = 2e3;  % number of bootstrap samples
+% Smoothed LP defaults
 
-settings.est.methods_shared = {'resp_ind',  [], ...
-                               'innov_ind', [], ...
-                               'alpha',     settings.est.alpha,...
-                               'no_const',  settings.est.no_const,...
-                               'se_homosk', settings.est.se_homosk,...
-                               'boot_num',  settings.est.boot_num};
+opts_slp.lambdaRange   = [0.001:0.005:0.021, 0.05:0.1:1.05, ...
+                          2:1:19, 20:20:100, 200:200:2000];  % CV grid, scaled by T
+opts_slp.CV_folds      = 5;                                  % Number of CV folds
+opts_slp.irfLimitOrder = 2;                                  % Shrink towards polynomial of that order
+opts_slp.undersmooth   = false;                              % multiply optimal lambda by 0.1? 
 
-% lag length selection
+% (Under-)smoothed LP defaults
 
-settings.est.est_n_lag  = isnan(lag_type);
+opts_slp_undersmooth             = opts_slp;
+opts_slp_undersmooth.undersmooth = true;
+
+% BVAR defaults
+
+if mode_type == 5
+    opts_bvar.RW = true;    % random walk prior
+else
+    opts_bvar.RW = false;    % WN prior
+end
+opts_bvar.ndraw = 500;  % Posterior draws
+
+%----------------------------------------------------------------
+% Add to methods
+%----------------------------------------------------------------
+
+% VAR AIC, VAR 4, VAR 8 (EHW, block bootstrap)
+[settings.est.methods{1:3}] = deal({'resp_ind' , [], ...
+    'innov_ind', [], ...
+    'bootstrap', 'var',...
+    'estimator', 'var', ...
+    'se_homosk', false,...
+    'boot_blocklength', ceil(5.03*settings.simul.T^(1/4)),...
+    'shrinkage', false});
+
+% VAR AIC (homoscedastic, recursive bootstrap)
+[settings.est.methods{4}] = deal({'resp_ind' , [], ...
+    'innov_ind', [], ...
+    'bootstrap', 'var',...
+    'estimator', 'var', ...
+    'se_homosk', true,...
+    'boot_blocklength', 1,...
+    'shrinkage', false});
+
+% LP AIC, LP 4 (EHW, block bootstrap)
+[settings.est.methods{5:6}] = deal({'resp_ind'  , [], ...
+    'innov_ind' , [], ...
+    'bootstrap', 'var',...
+    'estimator' , 'lp' , ...
+    'se_homosk', false,...
+    'boot_blocklength', ceil(5.03*settings.simul.T^(1/4)),...
+    'shrinkage' , false});  % LP
+
+% LP AIC (homoscedastic, recursive bootstrap)
+[settings.est.methods{7}] = deal({'resp_ind'  , [], ...
+    'innov_ind' , [], ...
+    'bootstrap', 'var',...
+    'estimator' , 'lp' , ...
+    'se_homosk', true,...
+    'boot_blocklength', 1,...
+    'shrinkage' , false});  % LP
+
+
+% BVAR
+settings.est.methods{8} = {'resp_ind',  [], ...
+    'innov_ind', [],...
+    'estimator', 'var',...
+    'bootstrap', [],...
+    'shrinkage', true,...
+    'opts_bvar', opts_bvar};
+
+% SLP, default
+settings.est.methods{9} = {'resp_ind',  [], ...
+    'innov_ind', [],...
+    'estimator', 'lp', ...
+    'bootstrap', [],...
+    'shrinkage', true, ...
+    'opts_slp',  opts_slp};
+
+% SLP, under-smoothed
+settings.est.methods{10} = {'resp_ind',  [], ...
+    'innov_ind', [],...
+    'estimator', 'lp', ...
+    'bootstrap', [],...
+    'shrinkage', true, ...
+    'opts_slp',  opts_slp_undersmooth};
+
+
+% Set lags
+settings.est.n_lags_fix          = [NaN; 4; 8; NaN; % VAR 
+                                    NaN; 4; NaN;    % LP
+                                    4; 4; 4];       % Shrinkiage
+settings.est.system_type         =  repmat({'big'}, 10, 1);
+
+
+if strcmp(estimand_type, 'obsshock')
+    settings.est.methods{11} = settings.est.methods{1};  % Small VAR AIC
+    settings.est.methods{12} = settings.est.methods{5};  % Small LP AIC
+    settings.est.n_lags_fix  = [settings.est.n_lags_fix; NaN; NaN];
+    settings.est.system_type = [settings.est.system_type; repmat({'small'}, 2, 1)];
+end
+
+settings.est.est_n_lag  = isnan(settings.est.n_lags_fix);  % indicator if lags are estimated
 settings.est.n_lags_max = 10;
-settings.est.n_lags_fix = lag_type;
+settings.est.n_methods  = length(settings.est.methods); % number of estimation methods
+
+%----------------------------------------------------------------
+% Shared settings
+%----------------------------------------------------------------
+
+settings.est.alpha      = 0.1;   % significance level. 1-alpha credible interval for BVAR.
+settings.est.no_const   = false; % true: omit intercept
+settings.est.boot_num   = 500;   % number of bootstrap samples
+settings.est.bias_corr  = true;  % Pope (1990) VAR bias correction or HJ (2024) LP bias correction.
+
+settings.est.methods_shared = {
+                               'alpha'    , settings.est.alpha,...
+                               'no_const' , settings.est.no_const,...
+                               'boot_num' , settings.est.boot_num,...
+                               'bias_corr', settings.est.bias_corr};
+
 
 %% PARALLELIZATION
 

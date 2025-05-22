@@ -18,7 +18,7 @@ function p_select = ic_var(y,p_max,method)
     
     % go through from one lag to max number of lags
     for p = 1:p_max
-        [~, ~, Sigma] = var_estim(y, p, true, true);
+        [~, ~, Sigma] = var_estim(y, p, true, false);
         bic(1,p) = log(det(Sigma)) + (n_v^2 * p + n_v) * log(T - p_max) / (T - p_max);
         aic(1,p) = log(det(Sigma)) + (n_v^2 * p + n_v) * 2 / (T - p_max);
     end

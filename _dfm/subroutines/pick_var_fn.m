@@ -126,7 +126,7 @@ function specifications = pick_var_fn(model, settings)
 
             % construct exhaustive list of DGPs
 
-            n_spec_exhaust = size(valid_combo_idx, 1);
+            n_spec_exhaust  = size(valid_combo_idx, 1);
             valid_combo_var = reshape(key_series(valid_combo_idx(:)), n_spec_exhaust, []);
 
             var_select = nan(n_spec_exhaust, random_n_var);

@@ -126,10 +126,12 @@ for is = 1:n_series;
        % Compute AR model for errors
        if r2_mat(is) < 0.9999;
         if levels==1 % If variables are in levels...
-         [~,arcoef,ser2] = VAR_CorrectBias(u(~isnan(u)),n_uarlag); % Bias-corrected AR coefficients
-         arcoef = arcoef(:)';
-         ser = sqrt(ser2);
-         ar_resid = NaN(size(u,1),1); % We don't really need the AR residuals later
+         [cons,arcoef,ser2] = VAR_CorrectBias(u(~isnan(u)),n_uarlag); % Bias-corrected AR coefficients
+         
+         arcoef   = arcoef(:)';
+         ser      = sqrt(ser2);
+         ar_resid = u(~isnan(u)) - lagmatrix(u(~isnan(u)), 1:n_uarlag)*squeeze(arcoef)' - cons;
+        
         else
          [arcoef, ser, ar_resid] = uar(u,n_uarlag);    % AR Coefficients and ser 
         end
